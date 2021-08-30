@@ -1,6 +1,7 @@
 use std::convert::TryInto;
 use std::fmt::Display;
-use std::ops::Add;
+use std::ops::Mul;
+
 
 
 
@@ -56,14 +57,14 @@ impl<T: Display> Matrix<T> {
     fn show(&self) {
         let mut i=0;
         println!("");
-        print!("|");
+        print!("| ");
         for val in &self.values {      
             if i == self.shape.1 {
                 println!("|");
-                print!("|");
+                print!("| ");
                 i=0
             }
-            print!("{}", val);
+            print!("{} ", val);
             i+=1;
         }
         println!("|");
@@ -85,45 +86,49 @@ impl<T> Matrix<T> {
 
 
 
-/*
 
-impl<T: Clone + Add<Output = T>> Matrix<T> {
+impl<T: Copy +  Clone + std::ops::Add<Output = T>  + std::ops::Mul<Output = T>> Matrix<T> {
     fn add(&self, Vec1 : Matrix<T>) -> Matrix<T> {
         Matrix::<T>{
         values:
             {
-            let mut r = Vec::new();
-            let v1 = Vec1.values.clone();
-            let v2= self.values.clone();
-            for i in 0..v1.len() {
-                r.push(v1[i] + v2[i]);
+            let mut r : Vec<T> = Vec::new();
+            for i in 0..self.values.len() {
+                r.push(Vec1.values[i] + self.values[i]);
             }
             r},
         shape:self.shape,
+        }
     }
-}
-}
+    fn mul(&self, scal : T) -> Matrix<T> 
+    where T: std::ops::Mul<Output=T>{
+        Matrix::<T>{
+        values:
+            {
+            let mut r : Vec<T> = Vec::new();
+            for i in 0..self.values.len() {
+                r.push(scal*self.values[i]);
+            }
+            r},
+        shape:self.shape,
+        }
+    }
 
-*/
+    fn minus(&self, Vec1 : Matrix<T>) -> Matrix<T> {
+       self.add(Vec1.mul(T))
+    }
 
+}
 
 
 
 
 fn main() {
     let mut v = Matrix::<f64>::eye(6);
-    let mut u = Matrix::<f64>::ones(6,6);
-    v.show();
+    let mut u = Matrix::<i32>::ones(6,6);
+    (v.add(u)).mul(2).show();
 
-    println!("{}", v.loc(5,5).expect("The given indice is invalid."));
 
-    let k = vec![1,2,3];
-    let l = vec![1,2,3];
-    let mut r= Vec::new();
-    for i in 0..k.len() {
-        r.push(k[i] + l[i])
-    }
-    println!("{}",r[1]);
 
 
     
