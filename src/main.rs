@@ -1,6 +1,6 @@
+#![allow(dead_code)]
+#![allow(unused_variables)]
 
-use std::convert::TryInto;
-use std::fmt::Display;
 use std::ops::Mul;
 use std::ops::Add;
 use std::ops::Sub;
@@ -9,42 +9,44 @@ use std::ops::Div;
 
 #[derive(Clone)]
 enum Matrix {
-    Int(Matrix_i),
-    Float(Matrix_f),
-    Bool(Matrix_b),
+    Int(MatrixI),
+    Float(MatrixF),
+    Bool(MatrixB),
     Null,
 }
 
+
 enum MatVector<'a> {
-    Int(&'a Vec<i32>),
-    Float(&'a Vec<f64>),
-    Bool(&'a Vec<bool>),
+    Int(Vec<&'a i32>),
+    Float(Vec<&'a f64>),
+    Bool(Vec<&'a bool>),
+    Null
 }
 
 
 #[derive(Clone)]
-struct Matrix_i {
+struct MatrixI {
     values: Vec<i32>,
     shape : (i32,i32),
 }
 #[derive(Clone)]
-struct Matrix_f {
+struct MatrixF {
     values: Vec<f64>,
     shape : (i32,i32),
 }
 #[derive(Clone)]
-struct Matrix_b {
+struct MatrixB {
     values: Vec<bool>,
     shape : (i32,i32),
 }
 
 
 
-fn show<T: std::fmt::Display>(V: &Vec<T>, shape:&(i32,i32)) {
+fn show<T: std::fmt::Display>(vect: &Vec<T>, shape:&(i32,i32)) {
     let mut i=0;
     println!("");
     print!("| ");
-    for val in V.iter() {      
+    for val in vect.iter() {      
         if i == shape.1 {
             println!("|");
             print!("| ");
@@ -56,8 +58,10 @@ fn show<T: std::fmt::Display>(V: &Vec<T>, shape:&(i32,i32)) {
     println!("|");
 }
 
+
+
 impl std::fmt::Display for Matrix {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, _f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match &self {
             Matrix::Int(a)=>Ok({show(&a.values,&a.shape); println!("-Int ({},{})-", &a.shape.0, &a.shape.1)}),
             Matrix::Float(a)=>Ok({show(&a.values,&a.shape);println!("-Float ({},{})-", &a.shape.0, &a.shape.1)}),
@@ -70,20 +74,66 @@ impl std::fmt::Display for Matrix {
 
 
 
-/*
 
-impl Matrix {
-    fn row(&self, i:i32) -> &MatVector {
+
+fn show_vector<T: std::fmt::Display>(vect: &Vec<&T>) {
+    print!("[ ");
+    for v in &*vect {
+        print!("{} ",v);
+    }
+    print!("]\n");
+}
+
+impl std::fmt::Display for MatVector<'_> {
+    fn fmt(&self, _f: &mut std::fmt::Formatter) -> std::fmt::Result{
         match &self {
-            Matrix::Int(a)=>&MatVector::Int(&a.values),
-            Matrix::Float(a)=>&MatVector::Float(&a.values),
-            Matrix::Bool(a)=>&MatVector::Bool(&a.values),
-            Matrix::Null=>&MatVector::Bool(([false].to_vec())),
+            MatVector::Int(a)=>Ok(show_vector(a)),
+            MatVector::Float(a)=>Ok(show_vector(a)),
+            MatVector::Bool(a)=>Ok(show_vector(a)),
+            MatVector::Null=>Err(std::fmt::Error),
         }
     }
+}
+
+
+
+
+
+
+impl Matrix {
+    fn row(&self, i:i32) -> MatVector {
+        let k = i as usize;
+        if i<0 || i>= self.get_shape().0 {
+            eprintln!("\nfn row(&self, i:i32) >>> The row indice is out of range : {} is not in [{}-{}]. \n", i, 0, self.get_shape().0-1);
+            std::process::exit(-1);
+        }
+        match &self {
+            Matrix::Int(a)=>MatVector::Int(a.values[(self.get_shape().1 as usize)*k..((self.get_shape().1 as usize) * (k+1))].iter().collect()),
+            Matrix::Float(a)=>MatVector::Float(a.values[(self.get_shape().1 as usize)*k..((self.get_shape().1 as usize) * (k+1))].iter().collect()),
+            Matrix::Bool(a)=>MatVector::Bool(a.values.iter().collect()),
+            Matrix::Null=>MatVector::Null,}
+    }
+
+    fn col(&self, j:i32) -> MatVector {
+        let k = j as usize;
+        if j<0 || j>= self.get_shape().1 {
+            eprintln!("\nfn col(&self, i:i32) >>> The col indice is out of range : {} is not in [{}-{}]. \n", k, 0, self.get_shape().0-1);
+            std::process::exit(-1);
+        }
+        match &self {
+            Matrix::Int(a)=>MatVector::Int({let mut r: Vec<&i32> = Vec::with_capacity(self.get_shape().0 as usize); for i in 0..self.get_shape().0 {r.push(&(a.values.get((i*self.get_shape().1 + j) as usize).expect("Indice out of range")))} r}),
+            Matrix::Float(a)=>MatVector::Float({let mut r: Vec<&f64> = Vec::with_capacity(self.get_shape().0 as usize); for i in 0..self.get_shape().0 {r.push(&(a.values.get((i*self.get_shape().1 + j) as usize).expect("Indice out of range")))} r}),
+            Matrix::Bool(a)=>MatVector::Bool({let mut r: Vec<&bool> = Vec::with_capacity(self.get_shape().0 as usize); for i in 0..self.get_shape().0 {r.push(&(a.values.get((i*self.get_shape().1 + j) as usize).expect("Indice out of range")))} r}),
+            Matrix::Null=>MatVector::Null,}
+    }
+
+
+
+
+    
 
 }
-*/
+
 
 
 
@@ -92,33 +142,33 @@ impl Matrix {
 
 
 impl Matrix {
-    fn convert_to(self, Type : &str) -> Matrix {
-        if Type == "i32" {
+    fn convert_to(self, type_ : &str) -> Matrix {
+        if type_ == "i32" {
             return match self {
-                Matrix::Int(a)=>Matrix::Bool(Matrix_b{ values: vec![false], shape:(1,1)}),
-                Matrix::Float(a)=>Matrix::Int(Matrix_i{values : { let mut r:Vec<i32>= Vec::new(); for i in 0..a.values.len() {r.push(a.values[i] as i32)} r}, shape: a.shape}),
-                Matrix::Bool(a)=>Matrix::Bool(Matrix_b{ values: vec![false], shape:(1,1)}),
-                Matrix::Null=>Matrix::Bool(Matrix_b{ values: vec![false], shape:(1,1)}),
+                Matrix::Int(_a)=>Matrix::Bool(MatrixB{ values: vec![false], shape:(1,1)}),
+                Matrix::Float(a)=>Matrix::Int(MatrixI{values : { let mut r:Vec<i32>= Vec::new(); for i in 0..a.values.len() {r.push(a.values[i] as i32)} r}, shape: a.shape}),
+                Matrix::Bool(_a)=>Matrix::Bool(MatrixB{ values: vec![false], shape:(1,1)}),
+                Matrix::Null=>Matrix::Bool(MatrixB{ values: vec![false], shape:(1,1)}),
             }
         }
-        else if Type == "f64" {
+        else if type_ == "f64" {
             return match self {
-                Matrix::Int(a)=>Matrix::Float(Matrix_f{values : { let mut r:Vec<f64> = Vec::new(); for i in 0..a.values.len() {r.push(a.values[i] as f64)} r}, shape: a.shape}),
-                Matrix::Float(a)=>Matrix::Bool(Matrix_b{ values: vec![false], shape:(1,1)}),
-                Matrix::Bool(a)=>Matrix::Bool(Matrix_b{ values: vec![false], shape:(1,1)}),
-                Matrix::Null=>Matrix::Bool(Matrix_b{ values: vec![false], shape:(1,1)}),
+                Matrix::Int(a)=>Matrix::Float(MatrixF{values : { let mut r:Vec<f64> = Vec::new(); for i in 0..a.values.len() {r.push(a.values[i] as f64)} r}, shape: a.shape}),
+                Matrix::Float(_a)=>Matrix::Bool(MatrixB{ values: vec![false], shape:(1,1)}),
+                Matrix::Bool(_a)=>Matrix::Bool(MatrixB{ values: vec![false], shape:(1,1)}),
+                Matrix::Null=>Matrix::Bool(MatrixB{ values: vec![false], shape:(1,1)}),
             }
         }
-        else if Type == "bool" {
+        else if type_ == "bool" {
             return match self {
-                Matrix::Int(a)=>Matrix::Bool(Matrix_b{ values: vec![false], shape:(1,1)}),
-                Matrix::Float(a)=>Matrix::Bool(Matrix_b{ values: vec![false], shape:(1,1)}),
-                Matrix::Bool(a)=>Matrix::Bool(Matrix_b{ values: vec![false], shape:(1,1)}),
-                Matrix::Null=>Matrix::Bool(Matrix_b{ values: vec![false], shape:(1,1)}),
+                Matrix::Int(_a)=>Matrix::Bool(MatrixB{ values: vec![false], shape:(1,1)}),
+                Matrix::Float(_a)=>Matrix::Bool(MatrixB{ values: vec![false], shape:(1,1)}),
+                Matrix::Bool(_a)=>Matrix::Bool(MatrixB{ values: vec![false], shape:(1,1)}),
+                Matrix::Null=>Matrix::Bool(MatrixB{ values: vec![false], shape:(1,1)}),
             }
         }
         else {
-            return Matrix::Bool(Matrix_b{ values: vec![false], shape:(1,1)})
+            return Matrix::Bool(MatrixB{ values: vec![false], shape:(1,1)})
         }
     }
 
@@ -140,92 +190,176 @@ impl Matrix {
 
 
 
-impl Mul<i32> for Matrix
+impl Mul<i32> for &Matrix
 {
     type Output = Matrix;
     fn mul(self, rhs: i32) -> Matrix {
         match self {
-            Matrix::Int(a)=> Matrix::Int(Matrix_i{ values: a.values.iter().map(|v| *v * rhs).collect(), shape:a.shape}),
-            Matrix::Float(a)=> Matrix::Float(Matrix_f{ values: a.values.iter().map(|v| *v * (rhs as f64)).collect(), shape:a.shape}),
-            Matrix::Bool(a)=> Matrix::Bool(Matrix_b{ values: a.values, shape:a.shape}),
-            Matrix::Null=> Matrix::Bool(Matrix_b{ values: vec![false], shape:(1,1)}),
+            Matrix::Int(a)=> Matrix::Int(MatrixI{ values: a.values.iter().map(|v| *v * rhs).collect(), shape:a.shape}),
+            Matrix::Float(a)=> Matrix::Float(MatrixF{ values: a.values.iter().map(|v| *v * (rhs as f64)).collect(), shape:a.shape}),
+            Matrix::Bool(a)=> Matrix::Bool(MatrixB{ values: vec![false], shape:a.shape}),
+            Matrix::Null=> Matrix::Bool(MatrixB{ values: vec![false], shape:(1,1)}),
         }
+    }
+}
+
+
+
+impl Mul<&Matrix> for i32 {
+    type Output = Matrix;
+    fn mul(self, rhs: &Matrix) -> Matrix{
+        rhs*(self)
     }
 }
 impl Mul<Matrix> for i32 {
     type Output = Matrix;
-    fn mul(self, rhs: Matrix) -> Matrix {
-        rhs*(self)
+    fn mul(self, rhs: Matrix) -> Matrix{
+        &rhs*(self)
+    }
+}
+impl Mul<i32> for Matrix{
+    type Output = Matrix;
+    fn mul(self, rhs: i32) -> Matrix{
+        rhs*(&self)
     }
 }
 
-impl Div<i32> for Matrix
+
+
+
+
+
+
+
+
+impl Div<i32> for &Matrix
 {
     type Output = Matrix;
     fn div(self, rhs: i32) -> Matrix {
         (1.0/(rhs as f64))*self
     }
 }
+impl Div<i32> for Matrix
+{
+    type Output = Matrix;
+    fn div(self, rhs: i32) -> Matrix {
+        &self/rhs
+    }
+}
 
 
-impl Mul<f64> for Matrix
+
+
+
+
+
+
+
+
+
+impl Mul<f64> for &Matrix
 {
     type Output = Matrix;
     fn mul(self, rhs: f64) -> Matrix {
         match self {
-            Matrix::Int(a)=> Matrix::Float(Matrix_f{ values: a.values.iter().map(|v| (*v as f64) * rhs).collect(), shape:a.shape}),
-            Matrix::Float(a)=> Matrix::Float(Matrix_f{ values: a.values.iter().map(|v| *v * rhs).collect(), shape:a.shape}),
-            Matrix::Bool(a)=> Matrix::Bool(Matrix_b{ values: a.values, shape:a.shape}),
-            Matrix::Null=> Matrix::Bool(Matrix_b{ values: vec![false], shape:(1,1)}),
+            Matrix::Int(a)=> Matrix::Float(MatrixF{ values: a.values.iter().map(|v| (*v as f64) * rhs).collect(), shape:a.shape}),
+            Matrix::Float(a)=> Matrix::Float(MatrixF{ values: a.values.iter().map(|v| *v * rhs).collect(), shape:a.shape}),
+            Matrix::Bool(a)=>Matrix::Bool(MatrixB{ values: vec![false], shape:a.shape}),
+            Matrix::Null=>Matrix::Bool(MatrixB{ values: vec![false], shape:(1,1)}),
         }
     }
 }
-impl Mul<Matrix> for f64 {
+impl Mul<&Matrix> for f64 {
     type Output = Matrix;
-    fn mul(self, rhs: Matrix) -> Matrix {
+    fn mul(self, rhs: &Matrix) -> Matrix{
         rhs*(self)
     }
 }
 
-impl Div<f64> for Matrix
+impl Mul<Matrix> for f64 {
+    type Output = Matrix;
+    fn mul(self, rhs: Matrix) -> Matrix{
+        &rhs*(self)
+    }
+}
+impl Mul<f64> for Matrix {
+    type Output = Matrix;
+    fn mul(self, rhs: f64) -> Matrix{
+        rhs*(&self)
+    }
+}
+
+
+
+
+
+
+impl Div<f64> for &Matrix
 {
     type Output = Matrix;
     fn div(self, rhs: f64) -> Matrix {
         (1.0/(rhs))*self
     }
 }
+impl Div<f64> for Matrix
+{
+    type Output = Matrix;
+    fn div(self, rhs: f64) -> Matrix {
+        (1.0/(rhs))*&self
+    }
+}
 
 
-impl Add<i32> for Matrix
+
+
+
+
+
+impl Add<i32> for &Matrix
 {
     type Output = Matrix;
     fn add(self, rhs: i32) -> Matrix {
         match self {
-            Matrix::Int(a)=> Matrix::Int(Matrix_i{ values: a.values.iter().map(|v| *v + rhs).collect(), shape:a.shape}),
-            Matrix::Float(a)=> Matrix::Float(Matrix_f{ values: a.values.iter().map(|v| *v + (rhs as f64)).collect(), shape:a.shape}),
-            Matrix::Bool(a)=> Matrix::Bool(Matrix_b{ values: a.values, shape:a.shape}),
-            Matrix::Null=> Matrix::Bool(Matrix_b{ values: vec![false], shape:(1,1)}),
+            Matrix::Int(a)=> Matrix::Int(MatrixI{ values: a.values.iter().map(|v| *v + rhs).collect(), shape:a.shape}),
+            Matrix::Float(a)=> Matrix::Float(MatrixF{ values: a.values.iter().map(|v| *v + (rhs as f64)).collect(), shape:a.shape}),
+            Matrix::Bool(a)=> Matrix::Bool(MatrixB{ values: vec![false], shape:a.shape}),
+            Matrix::Null=> Matrix::Bool(MatrixB{ values: vec![false], shape:(1,1)}),
         }
+    }
+}
+impl Add<&Matrix> for i32 {
+    type Output = Matrix;
+    fn add(self, rhs: &Matrix) -> Matrix {
+        rhs + (self)
     }
 }
 impl Add<Matrix> for i32 {
     type Output = Matrix;
     fn add(self, rhs: Matrix) -> Matrix {
-        rhs*(self)
+        &rhs + (self)
+    }
+}
+impl Add<i32> for Matrix {
+    type Output = Matrix;
+    fn add(self, rhs: i32) -> Matrix {
+        rhs + &self
     }
 }
 
-impl Sub<i32> for Matrix
+
+
+
+impl Sub<i32> for &Matrix
 {
     type Output = Matrix;
-    fn sub(self, rhs: i32) -> Matrix {
+    fn sub(self, rhs: i32) -> Matrix{
        self + (-1)*rhs
     }
 }
-impl Sub<Matrix> for i32 {
+impl Sub<&Matrix> for i32 {
     type Output = Matrix;
-    fn sub(self, rhs: Matrix) -> Matrix {
-        (-1)*(rhs - self)
+    fn sub(self, rhs: &Matrix) -> Matrix {
+        (-1)*&(rhs - self)
     }
 }
 
@@ -234,22 +368,53 @@ impl Sub<Matrix> for i32 {
 
 
 
-impl Add<f64> for Matrix
+impl Add<f64> for &Matrix
 {
     type Output = Matrix;
     fn add(self, rhs: f64) -> Matrix {
         match self {
-            Matrix::Int(a)=> Matrix::Float(Matrix_f{ values: a.values.iter().map(|v| (*v as f64) + rhs).collect(), shape:a.shape}),
-            Matrix::Float(a)=> Matrix::Float(Matrix_f{ values: a.values.iter().map(|v| *v + rhs).collect(), shape:a.shape}),
-            Matrix::Bool(a)=> Matrix::Bool(Matrix_b{ values: a.values, shape:a.shape}),
-            Matrix::Null=> Matrix::Bool(Matrix_b{ values: vec![false], shape:(1,1)}),
+            Matrix::Int(a)=> Matrix::Float(MatrixF{ values: a.values.iter().map(|v| (*v as f64) + rhs).collect(), shape:a.shape}),
+            Matrix::Float(a)=> Matrix::Float(MatrixF{ values: a.values.iter().map(|v| *v + rhs).collect(), shape:a.shape}),
+            Matrix::Bool(a)=> Matrix::Bool(MatrixB{ values: vec![false], shape:a.shape}),
+            Matrix::Null=> Matrix::Bool(MatrixB{ values: vec![false], shape:(1,1)}),
         }
     }
 }
+impl Add<&Matrix> for f64 {
+    type Output = Matrix;
+    fn add(self, rhs: &Matrix) -> Matrix {
+        rhs+(self)
+    }
+}
+
 impl Add<Matrix> for f64 {
     type Output = Matrix;
     fn add(self, rhs: Matrix) -> Matrix {
-        rhs+(self)
+        &rhs+(self)
+    }
+}
+
+impl Add<f64> for Matrix {
+    type Output = Matrix;
+    fn add(self, rhs: f64) -> Matrix {
+        rhs+(&self)
+    }
+}
+
+
+
+
+impl Sub<f64> for &Matrix
+{
+    type Output = Matrix;
+    fn sub(self, rhs: f64) -> Matrix {
+       self + (-1.0)*rhs
+    }
+}
+impl Sub<&Matrix> for f64 {
+    type Output = Matrix;
+    fn sub(self, rhs: &Matrix) -> Matrix{
+        (-1.0)*&(rhs - self)
     }
 }
 
@@ -257,24 +422,37 @@ impl Sub<f64> for Matrix
 {
     type Output = Matrix;
     fn sub(self, rhs: f64) -> Matrix {
-       self + (-1.0)*rhs
+       &self + (-1.0)*rhs
     }
 }
 impl Sub<Matrix> for f64 {
     type Output = Matrix;
-    fn sub(self, rhs: Matrix) -> Matrix {
-        (-1.0)*(rhs - self)
+    fn sub(self, rhs: Matrix) -> Matrix{
+        (-1.0)*&(&rhs - self)
     }
 }
 
 
 
-impl Add<Matrix> for Matrix
+
+impl Add<Matrix> for Matrix {
+    type Output = Matrix;
+    fn add(self, rhs: Matrix) -> Matrix {&self + &rhs}
+}
+
+impl Add<Matrix> for &Matrix {
+    type Output = Matrix;
+    fn add(self, rhs: Matrix) -> Matrix {self + &rhs}
+}
+impl Add<&Matrix> for Matrix {
+    type Output = Matrix;
+    fn add(self, rhs: &Matrix) -> Matrix {&self + rhs}
+}
+
+impl Add<&Matrix> for &Matrix
 {
     type Output = Matrix;
-    fn add(self, rhs: Matrix) -> Matrix {
-        
-
+    fn add(self, rhs: &Matrix) -> Matrix {
         if self.get_shape() != rhs.get_shape() {
             println!("\nCannot add both Matrix because shapes are different.\n");
             return Matrix::Null
@@ -285,38 +463,38 @@ impl Add<Matrix> for Matrix
             {
                 match rhs {
                     Matrix::Int(b)=> Matrix::Int( 
-                        Matrix_i{ values: { 
+                        MatrixI{ values: { 
                         let mut r: Vec<i32> = Vec::new(); for i in 0..a.values.len() {r.push(a.values[i] + b.values[i])} r
                     }, shape:a.shape}),
                     Matrix::Float(b)=> Matrix::Float(
                         
-                        Matrix_f{ values:{
+                        MatrixF{ values:{
                         let mut r: Vec<f64> = Vec::new(); for i in 0..a.values.len() {r.push((a.values[i] as f64) + b.values[i])} r
                     }, shape:a.shape}),
-                    Matrix::Bool(b)=> Matrix::Null,
+                    Matrix::Bool(_b)=> Matrix::Null,
                     Matrix::Null=> Matrix::Null,
                 }
             },
             Matrix::Float(a)=>
             {
                 match rhs {
-                    Matrix::Int(b)=> Matrix::Float(Matrix_f{ values: {
+                    Matrix::Int(b)=> Matrix::Float(MatrixF{ values: {
                         let mut r: Vec<f64> = Vec::new(); for i in 0..a.values.len() {r.push(a.values[i] + (b.values[i] as f64))} r
                     }, shape:a.shape}),
-                    Matrix::Float(b)=> Matrix::Float(Matrix_f{ values:{
+                    Matrix::Float(b)=> Matrix::Float(MatrixF{ values:{
                         let mut r: Vec<f64> = Vec::new(); for i in 0..a.values.len() {r.push(a.values[i] + b.values[i])} r
                     }, shape:a.shape}),
-                    Matrix::Bool(b)=>  Matrix::Null,
+                    Matrix::Bool(_b)=>  Matrix::Null,
                     Matrix::Null=> Matrix::Null,
                 }
 
             },
-            Matrix::Bool(a)=>
+            Matrix::Bool(_a)=>
             {
                 match rhs {
-                    Matrix::Int(b)=> Matrix::Null,
-                    Matrix::Float(b)=> Matrix::Null,
-                    Matrix::Bool(b)=> Matrix::Null,
+                    Matrix::Int(_b)=> Matrix::Null,
+                    Matrix::Float(_b)=> Matrix::Null,
+                    Matrix::Bool(_b)=> Matrix::Null,
                     Matrix::Null=> Matrix::Null,
                 }
 
@@ -324,9 +502,9 @@ impl Add<Matrix> for Matrix
             Matrix::Null=>
             {
                 match rhs {
-                    Matrix::Int(b)=> Matrix::Null,
-                    Matrix::Float(b)=> Matrix::Null,
-                    Matrix::Bool(b)=> Matrix::Null,
+                    Matrix::Int(_b)=> Matrix::Null,
+                    Matrix::Float(_b)=> Matrix::Null,
+                    Matrix::Bool(_b)=> Matrix::Null,
                     Matrix::Null=> Matrix::Null,
                 }
 
@@ -361,32 +539,33 @@ impl Add<Matrix> for Matrix
 
 
 impl Matrix {
-    fn new(shape1 : i32, shape2 : i32, dtype : String) -> Matrix { 
+    fn new(shape1 : i32, shape2 : i32, dtype : &str) -> Matrix { 
 
         if dtype == "i32" {
-            Matrix::Int( Matrix_i{values : vec![0; ((shape1*shape2) as usize) ], shape:(shape1,shape2)})
+            Matrix::Int( MatrixI{values : vec![0; (shape1*shape2) as usize ], shape:(shape1,shape2)})
         }
         else if dtype == "f64" {
-            Matrix::Float( Matrix_f{values : vec![0.0; ((shape1*shape2) as usize) ], shape:(shape1,shape2)})
+            Matrix::Float( MatrixF{values : vec![0.0; (shape1*shape2) as usize ], shape:(shape1,shape2)})
+
         }
         else if dtype == "bool" {
-            Matrix::Bool( Matrix_b{values : vec![false; ((shape1*shape2) as usize) ], shape:(shape1,shape2)})
+            Matrix::Bool( MatrixB{values : vec![false; (shape1*shape2) as usize ], shape:(shape1,shape2)})
         }
         else {
             Matrix::Null
         }
         
     }
-    fn ones(shape1 : i32, shape2 : i32, dtype : String) -> Matrix { 
+    fn ones(shape1 : i32, shape2 : i32, dtype : &str) -> Matrix { 
 
         if dtype == "i32" {
-            Matrix::Int( Matrix_i{values : vec![1; ((shape1*shape2) as usize) ], shape:(shape1,shape2)})
+            Matrix::Int( MatrixI{values : vec![1; (shape1*shape2) as usize ], shape:(shape1,shape2)})
         }
         else if dtype == "f64" {
-            Matrix::Float( Matrix_f{values : vec![1.0; ((shape1*shape2) as usize) ], shape:(shape1,shape2)})
+            Matrix::Float( MatrixF{values : vec![1.0; (shape1*shape2) as usize ], shape:(shape1,shape2)})
         }
         else if dtype == "bool" {
-            Matrix::Bool( Matrix_b{values : vec![true; ((shape1*shape2) as usize) ], shape:(shape1,shape2)})
+            Matrix::Bool( MatrixB{values : vec![true; (shape1*shape2) as usize ], shape:(shape1,shape2)})
         }
         else {
             Matrix::Null
@@ -394,9 +573,9 @@ impl Matrix {
 
         
     }
-    fn eye(shape : i32, dtype : String) -> Matrix { 
+    fn eye(shape : i32, dtype : &str) -> Matrix { 
         if dtype == "i32" {
-            Matrix::Int( Matrix_i{values : {let mut value : Vec<i32> = Vec::new();
+            Matrix::Int( MatrixI{values : {let mut value : Vec<i32> = Vec::new();
                 for i in 0..shape{
                     for j in 0..shape{
                         if i==j {
@@ -410,7 +589,7 @@ impl Matrix {
             value}, shape:(shape,shape)})
         }
         else if dtype == "f64" {
-            Matrix::Float( Matrix_f{values : {let mut value : Vec<f64> = Vec::new();
+            Matrix::Float( MatrixF{values : {let mut value : Vec<f64> = Vec::new();
                 for i in 0..shape{
                     for j in 0..shape{
                         if i==j {
@@ -424,7 +603,7 @@ impl Matrix {
             value}, shape:(shape,shape)})
         }
         else if dtype == "bool" {
-            Matrix::Bool( Matrix_b{values : {let mut value : Vec<bool> = Vec::new();
+            Matrix::Bool( MatrixB{values : {let mut value : Vec<bool> = Vec::new();
                 for i in 0..shape{
                     for j in 0..shape{
                         if i==j {
@@ -663,37 +842,12 @@ impl<T : Copy +  std::ops::Mul<Output = T>> Mul<T> for Matrix<T> {
 */
 
 fn main() {
-    let mat = Matrix::ones(5,5,"i32".to_string());
-    let mat2 = Matrix::eye(5,"i32".to_string());
+    let mat = &Matrix::ones(3,3,"i32");
+    let mat2 = &(Matrix::eye(3,"i32"));
 
-
-    println!("{}", 10*mat2);
-
-    let mut v: Vec<i32> = Vec::new();
-    v.push(5);
-    v.push(5);
-    v.push(5);
-    v.push(5);
-
-    let k : *const i32 = v.as_mut_ptr();
-
-    println!("{:?}", k);
-    
-
-    
-
-    //let Mat = Matrix::from_slice(&[Type::Int(1),Type::Int(10),Type::Float(1.2),Type::Bool(true)],2,2);
-    //Mat.show();
-    /*
-    let mut v = Matrix::<f64>::eye(6);
-    let mut u = Matrix::<i32>::ones(6,6);
-    */
-
-
-    //((v.add(u)).mul(-1)).show();
-
-
-
+    println!("{}", (3)*(7*mat + (-2)*mat + 1*3*mat2));
+    println!("{}", (8*mat));
+    println!("{}", (3.15*(3*mat))/0.5);
 
     
 }
