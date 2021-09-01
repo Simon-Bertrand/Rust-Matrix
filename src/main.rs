@@ -15,6 +15,13 @@ enum Matrix {
     Null,
 }
 
+enum MatVector<'a> {
+    Int(&'a Vec<i32>),
+    Float(&'a Vec<f64>),
+    Bool(&'a Vec<bool>),
+}
+
+
 #[derive(Clone)]
 struct Matrix_i {
     values: Vec<i32>,
@@ -52,13 +59,33 @@ fn show<T: std::fmt::Display>(V: &Vec<T>, shape:&(i32,i32)) {
 impl std::fmt::Display for Matrix {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match &self {
-            Matrix::Int(a)=>Ok({show(&a.values,&a.shape); println!("Type : Int")}),
-            Matrix::Float(a)=>Ok({show(&a.values,&a.shape);println!("Type : Float")}),
-            Matrix::Bool(a)=>Ok({show(&a.values, &a.shape);println!("Type : Bool")}),
+            Matrix::Int(a)=>Ok({show(&a.values,&a.shape); println!("-Int ({},{})-", &a.shape.0, &a.shape.1)}),
+            Matrix::Float(a)=>Ok({show(&a.values,&a.shape);println!("-Float ({},{})-", &a.shape.0, &a.shape.1)}),
+            Matrix::Bool(a)=>Ok({show(&a.values, &a.shape);println!("-Bool ({},{})-", &a.shape.0, &a.shape.1)}),
             Matrix::Null=>Err(std::fmt::Error),
         }
     }
 }
+
+
+
+
+/*
+
+impl Matrix {
+    fn row(&self, i:i32) -> &MatVector {
+        match &self {
+            Matrix::Int(a)=>&MatVector::Int(&a.values),
+            Matrix::Float(a)=>&MatVector::Float(&a.values),
+            Matrix::Bool(a)=>&MatVector::Bool(&a.values),
+            Matrix::Null=>&MatVector::Bool(([false].to_vec())),
+        }
+    }
+
+}
+*/
+
+
 
 
 
@@ -640,9 +667,20 @@ fn main() {
     let mat2 = Matrix::eye(5,"i32".to_string());
 
 
-    println!("{}", 10*mat2 + mat);
+    println!("{}", 10*mat2);
 
+    let mut v: Vec<i32> = Vec::new();
+    v.push(5);
+    v.push(5);
+    v.push(5);
+    v.push(5);
 
+    let k : *const i32 = v.as_mut_ptr();
+
+    println!("{:?}", k);
+    
+
+    
 
     //let Mat = Matrix::from_slice(&[Type::Int(1),Type::Int(10),Type::Float(1.2),Type::Bool(true)],2,2);
     //Mat.show();
