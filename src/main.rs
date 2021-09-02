@@ -42,33 +42,51 @@ struct MatrixB {
 }
 
 
-impl MatVector<'a> {
+impl MatVector<'_> {
     fn len(&self)->usize{
-        match &self {
+        match self {
             MatVector::Int(a)=>a.len(),
             MatVector::Float(a)=>a.len(),
             MatVector::Bool(a)=>a.len(),
             MatVector::Null=>0,
         }
     }
-    fn sprod(&self, vect: &MatVector) -> f64 {
-        if self.len() != vect.len() {
+
+}
+
+impl MatVector<'_>{
+    fn sprod(&self, vect: &'_ MatVector) -> f64 {
+        if (self.len()) != vect.len() {
             eprintln!("\nfn sprod(&self, vect: &MatVector) >>> The lengths are not the same : {} != {}. \n", self.len() , vect.len());
             std::process::exit(-1);
         }
         else {
-            match self {
-                //Match all cases for self : Matrix::Int(a)=>{let mut s: f64 = 0.0; for i in 0..self.len() {s=s+a.values[i]*self: }},
-                Matrix::Float(a)=>{},
-                Matrix::Bool(a)=>{},
-                Matrix::Null=>0.0,
+            match &self {
+                MatVector::Int(a)=>{
+                    match vect {
+                        MatVector::Int(b)=>{let mut s: f64 = 0.0; for i in 0..self.len() {s=s+ (*a[i] as f64)*(*b[i] as f64)} s},
+                        MatVector::Float(b)=>{let mut s: f64 = 0.0; for i in 0..self.len() {s=s+(*a[i] as f64)*b[i]} s},
+                        MatVector::Bool(b)=>{let mut s: f64 = 0.0; for i in 0..self.len() {s=s+0.0} s},
+                        MatVector::Null=>0.0,}}
+                    MatVector::Float(a)=>{
+                        match vect {
+                            MatVector::Int(b)=>{let mut s: f64 = 0.0; for i in 0..self.len() {s=s+(*a[i] as f64)*(*b[i] as f64)} s},
+                            MatVector::Float(b)=>{let mut s: f64 = 0.0; for i in 0..self.len() {s=s+(*a[i] as f64)*b[i]} s},
+                            MatVector::Bool(b)=>{let mut s: f64 = 0.0; for i in 0..self.len() {s=s+0.0} s},
+                            MatVector::Null=>0.0,}},
+                    MatVector::Bool(a)=>{
+                        match vect {
+                            MatVector::Int(b)=>{let mut s: f64 = 0.0; for i in 0..self.len() {s=s+0.0} s},
+                            MatVector::Float(b)=>{let mut s: f64 = 0.0; for i in 0..self.len() {s=s+0.0} s},
+                            MatVector::Bool(b)=>{let mut s: f64 = 0.0; for i in 0..self.len() {s=s+0.0} s},
+                            MatVector::Null=>0.0,}},
+                    MatVector::Null=>0.0,
             }
         }
         
     }
-
+    
 }
-
 
 impl std::fmt::Display for Matrix {
     fn fmt(&self, _f: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -103,12 +121,12 @@ impl std::fmt::Display for MatVector<'_> {
     fn fmt(&self, _f: &mut std::fmt::Formatter) -> std::fmt::Result{
         fn show_vector<T: std::fmt::Display>(vect: &Vec<&T>) {
             print!("[ ");
-            for v in &*vect {
+            for v in vect {
                 print!("{} ",v);
             }
             print!("]\n");
         }
-        match &self {
+        match self {
             MatVector::Int(a)=>Ok(show_vector(a)),
             MatVector::Float(a)=>Ok(show_vector(a)),
             MatVector::Bool(a)=>Ok(show_vector(a)),
@@ -116,9 +134,6 @@ impl std::fmt::Display for MatVector<'_> {
         }
     }
 }
-
-
-
 
 
 
@@ -130,10 +145,11 @@ impl Matrix {
             std::process::exit(-1);
         }
         match &self {
-            Matrix::Int(a)=>MatVector::Int(a.values[(self.get_shape().1 as usize)*k..((self.get_shape().1 as usize) * (k+1))].iter().collect()),
-            Matrix::Float(a)=>MatVector::Float(a.values[(self.get_shape().1 as usize)*k..((self.get_shape().1 as usize) * (k+1))].iter().collect()),
-            Matrix::Bool(a)=>MatVector::Bool(a.values.iter().collect()),
-            Matrix::Null=>MatVector::Null,}
+            Matrix::Int(a)=>MatVector::Int(vec![&1,&2,&0]),
+            Matrix::Float(a)=>MatVector::Float(vec![&1.0,&2.0,&0.0]),
+            Matrix::Bool(a)=> MatVector::Bool(vec![&true,&true,&true]),
+            Matrix::Null=>MatVector::Null,
+        }
     }
 
     fn col(&self, j:i32) -> MatVector {
@@ -143,18 +159,18 @@ impl Matrix {
             std::process::exit(-1);
         }
         match &self {
-            Matrix::Int(a)=>MatVector::Int({let mut r: Vec<&i32> = Vec::with_capacity(self.get_shape().0 as usize); for i in 0..self.get_shape().0 {r.push(&(a.values.get((i*self.get_shape().1 + j) as usize).expect("Indice out of range")))} r}),
-            Matrix::Float(a)=>MatVector::Float({let mut r: Vec<&f64> = Vec::with_capacity(self.get_shape().0 as usize); for i in 0..self.get_shape().0 {r.push(&(a.values.get((i*self.get_shape().1 + j) as usize).expect("Indice out of range")))} r}),
-            Matrix::Bool(a)=>MatVector::Bool({let mut r: Vec<&bool> = Vec::with_capacity(self.get_shape().0 as usize); for i in 0..self.get_shape().0 {r.push(&(a.values.get((i*self.get_shape().1 + j) as usize).expect("Indice out of range")))} r}),
+            Matrix::Int(a)=>MatVector::Int(vec![&1,&2,&0]),
+            Matrix::Float(a)=>MatVector::Float(vec![&1.0,&2.0,&0.0]),
+            Matrix::Bool(a)=>MatVector::Bool(vec![&false,&true,&true]),
             Matrix::Null=>MatVector::Null,}
     }
 
-
+}
 
 
     
 
-}
+
 
 
 
@@ -796,7 +812,6 @@ fn main() {
     let mat = &Matrix::ones(3,3);
     let mat2 = &Matrix::eye(3,"i32");
 
-    println!("{}", mat/(5*mat2));
-    println!("{}", (3*mat));
-    println!("{}", (3.15*(3*mat))/0.5);
+    println!("{}", mat.col(1).sprod(&mat2.col(1)));
+    println!("{}{}", mat.col(1),mat2.col(1))
 }
