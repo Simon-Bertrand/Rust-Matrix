@@ -45,7 +45,10 @@ impl MatVector<'_>{
         }
         
     }
-    
+
+    pub fn norm(&self) -> f64 {
+        self.sprod(self).sqrt()
+    }
 }
 
 

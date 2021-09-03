@@ -1,5 +1,6 @@
 mod display;
 mod matvector;
+mod operators;
 
 pub enum MatVector<'a> {
     Int(Vec<&'a i32>),

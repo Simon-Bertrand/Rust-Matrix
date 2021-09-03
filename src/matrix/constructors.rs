@@ -32,6 +32,31 @@ impl Matrix {
         Matrix::new(shape1, shape2, "f64") + fill_value
     }
 
+    pub fn tri(shape : i32, offset: i32) -> Matrix { 
+        Matrix::Int(MatrixI{values : {let mut r : Vec<i32> = Vec::with_capacity((shape*shape) as usize); 
+        for i in 0..shape {
+            for j in 0..shape {
+                if i<=j-offset {
+                    r.push(1)
+                }
+                else {
+                    r.push(0)
+                }
+                
+            }
+        }
+        r}, shape:(shape, shape)})
+    }
+
+    pub fn linstep(shape1 : i32,shape2 : i32,step: i32) -> Matrix { 
+        Matrix::Int(MatrixI{values : {let mut r : Vec<i32> = Vec::with_capacity((shape1*shape2) as usize); 
+        for i in 0..shape1*shape2 {
+                r.push(step*i)
+            }
+        
+        r}, shape:(shape1, shape2)})
+    }
+
     pub fn rand_binary(shape1 : i32, shape2 : i32) -> Matrix { 
         Matrix::Int(MatrixI{values : {
             let mut r : Vec<i32> = Vec::with_capacity((shape1*shape2) as usize);

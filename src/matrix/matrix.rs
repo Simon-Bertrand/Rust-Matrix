@@ -137,6 +137,16 @@ impl Matrix {
 
 
 
-
+impl Matrix {
+    pub fn max(&self) -> f64 {
+        match &self {
+            Matrix::Int(a)=>{let mut max = &a.values[0]; for el in a.values.iter()  {if max < el  { max = el;}} *max as f64},
+            Matrix::Float(a)=>{let mut max = &a.values[0]; for el in a.values.iter()  {if max < el  { max = el;}} *max},
+            Matrix::Bool(a)=>{let mut max = &0.0; for el in a.values.iter()  {if *el { max=&1.0 } else {max=&0.0}} *max},
+            Matrix::Null=>0.0,
+        }
+    }
+    
+}
     
 
