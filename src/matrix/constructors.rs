@@ -1,5 +1,5 @@
 use crate::matrix::*;
-
+use crate::matvector::*;
 
 use rand::Rng;
 use std::vec;
@@ -116,4 +116,92 @@ impl Matrix {
         
         
     }
+
+    pub fn from_vec_of_vec_int(M:Vec<&Vec<i32>>) -> Matrix {
+        let mut result_vect : Vec<MatVector>= Vec::new();
+        for vect in M.iter() {
+            result_vect.push(MatVector::from_int_vec(*vect));
+        }
+        Matrix::from_matvector(&result_vect)
+    }
+    pub fn from_vec_of_vec_float(M:Vec<&Vec<f64>>) -> Matrix {
+        let mut result_vect : Vec<MatVector>= Vec::new();
+        for vect in M.iter() {
+            result_vect.push(MatVector::from_float_vec(*vect));
+        }
+        Matrix::from_matvector(&result_vect)
+    }
+    pub fn from_vec_of_vec_bool(M:Vec<&Vec<bool>>) -> Matrix {
+        let mut result_vect : Vec<MatVector>= Vec::new();
+        for vect in M.iter() {
+            result_vect.push(MatVector::from_bool_vec(*vect));
+        }
+        Matrix::from_matvector(&result_vect)
+    }
+
+    fn from_matvector(l_mv : &Vec<MatVector>) -> Matrix { 
+
+
+        let mut mv_type_old= match &l_mv[0] {
+            MatVector::Int(a)=>String::from("i32"),
+            MatVector::Float(a)=>String::from("f64"),
+            MatVector::Bool(a)=>String::from("bool"),
+            MatVector::Null=>String::from("Null"),
+        };
+
+        for el in l_mv.iter() {
+            let mv_type= match el {
+                MatVector::Int(a)=>String::from("i32"),
+                MatVector::Float(a)=>String::from("f64"),
+                MatVector::Bool(a)=>String::from("bool"),
+                MatVector::Null=>String::from("Null"),
+            };
+            if mv_type != mv_type_old {
+                eprintln!("\nfn from_matvector(l_mv : Vec<MatVector>) >>> The MatVector variants are not the same inside the Vec. \n");
+                std::process::exit(-1);
+            }
+            else {
+                mv_type_old=mv_type
+            }
+        }
+
+
+        let mut result_i : Vec<i32> = Vec::new();
+        let mut result_f : Vec<f64> = Vec::new();
+        let mut result_b : Vec<bool> = Vec::new();
+        
+        for el in l_mv.iter() {
+            match el {
+                MatVector::Int(a)=> for element in a {result_i.push(**element)},
+                MatVector::Float(a)=>for element in a {result_f.push(**element)},
+                MatVector::Bool(a)=>for element in a {result_b.push(**element)},
+                MatVector::Null=>{},
+            }
+            
+        }
+
+
+
+        if mv_type_old == "i32" {
+            Matrix::Int(MatrixI{values:result_i, shape:(l_mv.len() as i32,l_mv[0].len() as i32)})
+        }
+        else if mv_type_old == "f64" {
+            Matrix::Float(MatrixF{values:result_f, shape:(l_mv.len() as i32,l_mv[0].len() as i32)})
+        }
+        else if mv_type_old == "bool" {
+            Matrix::Bool(MatrixB{values:result_b, shape:(l_mv.len() as i32,l_mv[0].len() as i32)})
+        }
+        else {
+            Matrix::Null
+        }
+
+    }
+}
+
+impl Matrix {
+    fn add_row(&self,i:i32,vect : MatVector) -> Matrix {
+        
+    }
+
+
 }

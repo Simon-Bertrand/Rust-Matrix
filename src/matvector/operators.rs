@@ -7,7 +7,9 @@ use crate::matvector::*;
 
 
 impl MatVector<'_> {
-    pub fn from_vec<'a>(vect : &'a Vec<i32>) -> MatVector<'a> { MatVector::Int((*vect).iter().collect())}
+    pub fn from_int_vec<'a>(vect : &'a Vec<i32>) -> MatVector<'a> { MatVector::Int((*vect).iter().collect())}
+    pub fn from_float_vec<'a>(vect : &'a Vec<f64>) -> MatVector<'a> { MatVector::Float((*vect).iter().collect())}
+    pub fn from_bool_vec<'a>(vect : &'a Vec<bool>) -> MatVector<'a> { MatVector::Bool((*vect).iter().collect())}
 }
 
 

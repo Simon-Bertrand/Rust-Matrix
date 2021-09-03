@@ -1,7 +1,7 @@
 use crate::matvector::*;
 
 impl MatVector<'_> {
-    fn len(&self)->usize{
+    pub fn len(&self)->usize{
         match self {
             MatVector::Int(a)=>a.len(),
             MatVector::Float(a)=>a.len(),

@@ -17,9 +17,23 @@ fn main() {
     let linstep = &Matrix::linstep(m, n, 1);
     tri.show();
 
-    let v =&vec![1,2,3];
-    let vect = &MatVector::from_vec(v);
-    println!("{}", vect);
+    let u =vec![1,2,3];
+    let u2=vec![4,5,6];
+    let u3=vec![7,8,9];
+
+
+
+    let mut V : Vec<&Vec<i32>>= Vec::new();
+    V.push(&u);
+    V.push(&u2);
+    V.push(&u3);
+    V.push(&u3);
+
+
+
+
+    let M = Matrix::from_vec_of_vec_int(V);
+    println!("{}", M);
 
 
 
