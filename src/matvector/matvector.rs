@@ -15,7 +15,7 @@ impl MatVector<'_> {
 
 
 impl MatVector<'_>{
-    pub fn sprod(&self, vect: &'_ MatVector) -> f64 {
+    pub fn sprod(&self, vect: &'_ MatVector) -> f64{
         if (self.len()) != vect.len() {
             eprintln!("\nfn sprod(&self, vect: &MatVector) >>> The lengths are not the same : {} != {}. \n", self.len() , vect.len());
             std::process::exit(-1);
@@ -24,14 +24,14 @@ impl MatVector<'_>{
             match &self {
                 MatVector::Int(a)=>{
                     match vect {
-                        MatVector::Int(b)=>{let mut s: f64 = 0.0; for i in 0..self.len() {s=s+ (*a[i] as f64)*(*b[i] as f64)} s},
-                        MatVector::Float(b)=>{let mut s: f64 = 0.0; for i in 0..self.len() {s=s+(*a[i] as f64)*b[i]} s},
+                        MatVector::Int(b)=>{let mut s: i32 = 0; for i in 0..self.len() {s=s+ *a[i]**b[i]} s as f64},
+                        MatVector::Float(b)=>{let mut s: f64 = 0.0; for i in 0..self.len() {s=s+(*a[i] as f64)**b[i]} s},
                         MatVector::Bool(b)=>{let mut s: f64 = 0.0; for i in 0..self.len() {s=s+0.0} s},
                         MatVector::Null=>0.0}}
                     MatVector::Float(a)=>{
                         match vect {
                             MatVector::Int(b)=>{let mut s: f64 = 0.0; for i in 0..self.len() {s=s+(*a[i] as f64)*(*b[i] as f64)} s},
-                            MatVector::Float(b)=>{let mut s: f64 = 0.0; for i in 0..self.len() {s=s+(*a[i] as f64)*b[i]} s},
+                            MatVector::Float(b)=>{let mut s: f64 = 0.0; for i in 0..self.len() {s=s+(*a[i] as f64)**b[i]} s},
                             MatVector::Bool(b)=>{let mut s: f64 = 0.0; for i in 0..self.len() {s=s+0.0} s},
                             MatVector::Null=>0.0}},
                     MatVector::Bool(a)=>{
@@ -50,6 +50,5 @@ impl MatVector<'_>{
         self.sprod(self).sqrt()
     }
 }
-
 
 

@@ -2,7 +2,7 @@ use crate::matvector::MatVector;
 
 impl std::fmt::Display for MatVector<'_> {
     fn fmt(&self, _f: &mut std::fmt::Formatter) -> std::fmt::Result{
-        fn show_vector<T: std::fmt::Display>(vect: &Vec<&T>) {
+        fn show_vector<T: std::fmt::Display>(vect: &Vec<&mut T>) {
             print!("[ ");
             for v in vect {
                 print!("{} ",v);

@@ -8,14 +8,14 @@ impl Matrix {
     pub fn new(shape1 : i32, shape2 : i32, dtype : &str) -> Matrix { 
 
         if dtype == "i32" {
-            Matrix::Int( MatrixI{values : vec![0; (shape1*shape2) as usize ], shape:(shape1,shape2)})
+            Matrix::Int( MatrixStruct::<i32>{values : vec![0; (shape1*shape2) as usize ], shape:(shape1,shape2)})
         }
         else if dtype == "f64" {
-            Matrix::Float( MatrixF{values : vec![0.0; (shape1*shape2) as usize ], shape:(shape1,shape2)})
+            Matrix::Float( MatrixStruct::<f64>{values : vec![0.0; (shape1*shape2) as usize ], shape:(shape1,shape2)})
 
         }
         else if dtype == "bool" {
-            Matrix::Bool( MatrixB{values : vec![false; (shape1*shape2) as usize ], shape:(shape1,shape2)})
+            Matrix::Bool( MatrixStruct::<bool>{values : vec![false; (shape1*shape2) as usize ], shape:(shape1,shape2)})
         }
         else {
             Matrix::Null
@@ -33,7 +33,7 @@ impl Matrix {
     }
 
     pub fn tri(shape : i32, offset: i32) -> Matrix { 
-        Matrix::Int(MatrixI{values : {let mut r : Vec<i32> = Vec::with_capacity((shape*shape) as usize); 
+        Matrix::Int(MatrixStruct::<i32>{values : {let mut r : Vec<i32> = Vec::with_capacity((shape*shape) as usize); 
         for i in 0..shape {
             for j in 0..shape {
                 if i<=j-offset {
@@ -49,7 +49,7 @@ impl Matrix {
     }
 
     pub fn linstep(shape1 : i32,shape2 : i32,step: i32) -> Matrix { 
-        Matrix::Int(MatrixI{values : {let mut r : Vec<i32> = Vec::with_capacity((shape1*shape2) as usize); 
+        Matrix::Int(MatrixStruct::<i32>{values : {let mut r : Vec<i32> = Vec::with_capacity((shape1*shape2) as usize); 
         for i in 0..shape1*shape2 {
                 r.push(step*i)
             }
@@ -58,7 +58,7 @@ impl Matrix {
     }
 
     pub fn rand_binary(shape1 : i32, shape2 : i32) -> Matrix { 
-        Matrix::Int(MatrixI{values : {
+        Matrix::Int(MatrixStruct::<i32>{values : {
             let mut r : Vec<i32> = Vec::with_capacity((shape1*shape2) as usize);
             let mut rng = rand::thread_rng();
             for _ in 0..shape1*shape2 {r.push(rng.gen_range(0..=1))}
@@ -69,7 +69,7 @@ impl Matrix {
 
     pub fn eye(shape : i32, dtype : &str) -> Matrix { 
         if dtype == "i32" {
-            Matrix::Int( MatrixI{values : {let mut value : Vec<i32> = Vec::new();
+            Matrix::Int( MatrixStruct::<i32>{values : {let mut value : Vec<i32> = Vec::new();
                 for i in 0..shape{
                     for j in 0..shape{
                         if i==j {
@@ -83,7 +83,7 @@ impl Matrix {
             value}, shape:(shape,shape)})
         }
         else if dtype == "f64" {
-            Matrix::Float( MatrixF{values : {let mut value : Vec<f64> = Vec::new();
+            Matrix::Float( MatrixStruct::<f64>{values : {let mut value : Vec<f64> = Vec::new();
                 for i in 0..shape{
                     for j in 0..shape{
                         if i==j {
@@ -97,7 +97,7 @@ impl Matrix {
             value}, shape:(shape,shape)})
         }
         else if dtype == "bool" {
-            Matrix::Bool( MatrixB{values : {let mut value : Vec<bool> = Vec::new();
+            Matrix::Bool( MatrixStruct::<bool>{values : {let mut value : Vec<bool> = Vec::new();
                 for i in 0..shape{
                     for j in 0..shape{
                         if i==j {
@@ -116,22 +116,22 @@ impl Matrix {
         
         
     }
-
-    pub fn from_vec_of_vec_int(M:Vec<&Vec<i32>>) -> Matrix {
+    /*
+    pub fn from_vec_of_vec_int(M:Vec<Vec<i32>>) -> Matrix {
         let mut result_vect : Vec<MatVector>= Vec::new();
         for vect in M.iter() {
             result_vect.push(MatVector::from_int_vec(*vect));
         }
         Matrix::from_matvector(&result_vect)
     }
-    pub fn from_vec_of_vec_float(M:Vec<&Vec<f64>>) -> Matrix {
+    pub fn from_vec_of_vec_float(M:Vec<Vec<f64>>) -> Matrix {
         let mut result_vect : Vec<MatVector>= Vec::new();
         for vect in M.iter() {
             result_vect.push(MatVector::from_float_vec(*vect));
         }
         Matrix::from_matvector(&result_vect)
     }
-    pub fn from_vec_of_vec_bool(M:Vec<&Vec<bool>>) -> Matrix {
+    pub fn from_vec_of_vec_bool(M:Vec<Vec<bool>>) -> Matrix {
         let mut result_vect : Vec<MatVector>= Vec::new();
         for vect in M.iter() {
             result_vect.push(MatVector::from_bool_vec(*vect));
@@ -183,25 +183,19 @@ impl Matrix {
 
 
         if mv_type_old == "i32" {
-            Matrix::Int(MatrixI{values:result_i, shape:(l_mv.len() as i32,l_mv[0].len() as i32)})
+            Matrix::Int(MatrixStruct::<i32>{values:result_i, shape:(l_mv.len() as i32,l_mv[0].len() as i32)})
         }
         else if mv_type_old == "f64" {
-            Matrix::Float(MatrixF{values:result_f, shape:(l_mv.len() as i32,l_mv[0].len() as i32)})
+            Matrix::Float(MatrixStruct::<f64>{values:result_f, shape:(l_mv.len() as i32,l_mv[0].len() as i32)})
         }
         else if mv_type_old == "bool" {
-            Matrix::Bool(MatrixB{values:result_b, shape:(l_mv.len() as i32,l_mv[0].len() as i32)})
+            Matrix::Bool(MatrixStruct::<bool>{values:result_b, shape:(l_mv.len() as i32,l_mv[0].len() as i32)})
         }
         else {
             Matrix::Null
         }
 
     }
-}
 
-impl Matrix {
-    fn add_row(&self,i:i32,vect : MatVector) -> Matrix {
-        
-    }
-
-
+*/
 }

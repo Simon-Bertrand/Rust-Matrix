@@ -6,25 +6,15 @@ mod operators;
 
 #[derive(Clone)]
 pub enum Matrix {
-    Int(MatrixI),
-    Float(MatrixF),
-    Bool(MatrixB),
+    Int(MatrixStruct<i32>),
+    Float(MatrixStruct<f64>),
+    Bool(MatrixStruct<bool>),
     Null,
 }
 
 
 #[derive(Clone)]
-pub struct MatrixI {
-    values: Vec<i32>,
-    shape : (i32,i32),
-}
-#[derive(Clone)]
-pub struct MatrixF {
-    values: Vec<f64>,
-    shape : (i32,i32),
-}
-#[derive(Clone)]
-pub struct MatrixB {
-    values: Vec<bool>,
+pub struct MatrixStruct<T> {
+    values: Vec<T>,
     shape : (i32,i32),
 }
