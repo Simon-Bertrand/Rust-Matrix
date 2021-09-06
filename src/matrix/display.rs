@@ -1,35 +1,30 @@
-use crate::matrix::Matrix;
+use crate::matrix::*;
 use crate::utils::functions::count_digits;
 
-impl std::fmt::Display for Matrix {
+
+
+impl<T : std::fmt::Display> std::fmt::Display for Matrix<T> {
     fn fmt(&self, _f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        let spaces = 1 + count_digits(self.max());
-        fn show<T: std::fmt::Display>(vect: &Vec<T>, shape:&(i32,i32), space:i32) {
+        let spaces = 1 + count_digits(3.0);
             let mut i=0;
             println!("");
             print!("|");
-            for val in vect.iter() {      
-                if i == shape.1 {
-                    println!("{val:>width$}", val="|", width=(space as usize));
+            for val in self.values.iter() {      
+                if i == self.shape.1 {
+                    println!("{val:>width$}", val="|", width=(spaces as usize));
                     print!("|");
                     i=0
                 }
-                print!("{val:>width$}", val=val, width=(space as usize));
+                print!("{val:>width$}", val=val, width=(spaces as usize));
                 i+=1;
             }
-            println!("{val:>width$}", val="|", width=(space as usize));
-        }
-        match &self {
-            Matrix::Int(a)=>Ok({show(&a.values,&a.shape, spaces); println!("-Int ({},{})-", &a.shape.0, &a.shape.1)}),
-            Matrix::Float(a)=>Ok({show(&a.values,&a.shape,spaces);println!("-Float ({},{})-", &a.shape.0, &a.shape.1)}),
-            Matrix::Bool(a)=>Ok({show(&a.values, &a.shape,spaces);println!("-Bool ({},{})-", &a.shape.0, &a.shape.1)}),
-            Matrix::Null=>Err(std::fmt::Error),
-        }
+            println!("{val:>width$}", val="|", width=(spaces as usize));
+            Ok(println!("- Type ({},{})", self.shape.0, self.shape.1))
     }
 }
 
 
-impl Matrix {
+impl<T : std::fmt::Display> Matrix<T> {
     pub fn show(&self) {
         println!("{}", self)
     }

@@ -1,21 +1,45 @@
 use crate::matrix::*;
-use crate::matvector::*;
+
 
 use rand::Rng;
 use std::vec;
 
-impl Matrix {
+trait Display {
+    fn show(&self);
+}
+
+pub trait Constructors<T> {
+    fn fill(shape1 : i32, shape2 : i32, fill_value :T) -> Self;
+}
+
+
+impl<T : Clone> Constructors<T> for Matrix<T> {
+    fn fill(shape1 : i32, shape2 : i32, fill_value : T) -> Matrix<T> {
+        Matrix::<T>{values : vec![fill_value; (shape1*shape2) as usize], shape:(shape1,shape2)}
+    }
+}
+
+
+
+/*
+
+
+
+
+
+
+impl<T> Matrix for i32 {
     pub fn new(shape1 : i32, shape2 : i32, dtype : &str) -> Matrix { 
 
         if dtype == "i32" {
-            Matrix::Int( MatrixStruct::<i32>{values : vec![0; (shape1*shape2) as usize ], shape:(shape1,shape2)})
+           
         }
         else if dtype == "f64" {
-            Matrix::Float( MatrixStruct::<f64>{values : vec![0.0; (shape1*shape2) as usize ], shape:(shape1,shape2)})
+            Matrix( Matrix::<f64>{values : vec![0.0; (shape1*shape2) as usize ], shape:(shape1,shape2)})
 
         }
         else if dtype == "bool" {
-            Matrix::Bool( MatrixStruct::<bool>{values : vec![false; (shape1*shape2) as usize ], shape:(shape1,shape2)})
+            Matrix( Matrix::<bool>{values : vec![false; (shape1*shape2) as usize ], shape:(shape1,shape2)})
         }
         else {
             Matrix::Null
@@ -199,3 +223,5 @@ impl Matrix {
 
 */
 }
+
+*/

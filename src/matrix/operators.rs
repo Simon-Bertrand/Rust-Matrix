@@ -3,89 +3,129 @@ use std::ops::Add;
 use std::ops::Sub;
 use std::ops::Div;
 
-use crate::matrix::*;
 
+use crate::matrix::Matrix;
 
-impl Mul<i32> for &Matrix
+impl<T : Mul + Copy> Mul<T> for &Matrix<T>
 {
-    type Output = Matrix;
-    fn mul(self, rhs: i32) -> Matrix {
-        match self {
-            Matrix::Int(a)=> Matrix::Int(MatrixStruct::<i32>{ values: a.values.iter().map(|v| *v * rhs).collect(), shape:a.shape}),
-            Matrix::Float(a)=> Matrix::Float(MatrixStruct::<f64>{ values: a.values.iter().map(|v| *v * (rhs as f64)).collect(), shape:a.shape}),
-            Matrix::Bool(a)=> Matrix::Bool(MatrixStruct::<bool>{ values: vec![false], shape:a.shape}),
-            Matrix::Null=> Matrix::Bool(MatrixStruct::<bool>{ values: vec![false], shape:(1,1)}),
+    type Output = Matrix<T::Output>;
+    fn mul(self, rhs: T) -> Matrix<T::Output> {
+        Matrix::<T::Output>{ 
+            values: {
+                let mut r: Vec<T::Output> = Vec::with_capacity(((&self).shape.0*(&self).shape.1) as usize); 
+                for el in (&self).values.iter() {
+                    r.push(*el * rhs)
+                }
+                r},
+            shape:self.shape}    
         }
+}
+/*
+impl<T> Mul<&Matrix<T>> for T {
+    type Output = Matrix<T>;
+    fn mul(&self, rhs: &Matrix<T>) -> Matrix<T>{
+        rhs*(*self)
     }
 }
 
 
-
-impl Mul<&Matrix> for i32 {
-    type Output = Matrix;
-    fn mul(self, rhs: &Matrix) -> Matrix{
-        rhs*(self)
-    }
-}
-impl Mul<Matrix> for i32 {
-    type Output = Matrix;
-    fn mul(self, rhs: Matrix) -> Matrix{
-        &rhs*(self)
-    }
-}
-impl Mul<i32> for Matrix{
-    type Output = Matrix;
-    fn mul(self, rhs: i32) -> Matrix{
-        rhs*(&self)
+impl<T : Mul> Mul<Matrix<T>> for T {
+    type Output = Matrix<T>;
+    fn mul(&self, rhs: Matrix<T>) -> Matrix<T>{
+        &rhs*(*self)
     }
 }
 
+impl<T : Mul> Mul<T> for Matrix<T>{
+    type Output = Matrix<T>;
+    fn mul(&self,rhs: T) -> Matrix<T>{
+        (*self)*rhs
+    }
+}
+
+*/
+
+/*
+
+impl<T : Div> Div<&Matrix<T>> for &Matrix<T> {
+    type Output = Matrix<T::Output>;
+    fn div(self, rhs: &Matrix<T>) -> Matrix<T::Output>{
+            // Need zero division check       
+            Matrix::<T::Output>{ 
+                values: {
+                    let mut r: Vec<T::Output> = Vec::with_capacity(((&rhs).shape.0*(*rhs).shape.1) as usize); 
+                    for (i,el) in (&rhs).values.iter().enumerate() {
+                        r.push(*(&self).values.get(i).expect("Indice not found.") / *el)
+                    }
+                    r},
+                shape:(&rhs).shape
+            }    
+    }
+}
 
 
-
-
-
-
-
-
-impl Div<i32> for &Matrix
+impl<T> Div<T> for &Matrix<T> {
+    type Output = Matrix<T>;
+    fn div(self, rhs: T) {
+        (<Matrix<T> as Constructors<T>>::new(n,m) + 1)/self
+    }
+}
+impl<T : Div> Div<Matrix<T>> for &Matrix<T>
 {
-    type Output = Matrix;
-    fn div(self, rhs: i32) -> Matrix {
-        (1.0/(rhs as f64))*self
+    type Output = Matrix<T>;
+    fn div(self, rhs: Matrix<T>) -> Matrix<T>{
+        self / &rhs
     }
 }
-impl Div<i32> for Matrix
+impl<T : Div> Div<&Matrix<T>> for Matrix<T>
 {
-    type Output = Matrix;
-    fn div(self, rhs: i32) -> Matrix {
+    type Output = Matrix<T>;
+    fn div(self, rhs: &Matrix<T>) -> Matrix<T>{
+        &self / rhs
+    }
+}
+
+
+/*
+impl<T : Div> Div<T> for &Matrix<T>
+{
+    type Output = Matrix<T>;
+    fn div(self, rhs: &T) -> Matrix<T>{
+        1/(*rhs))*self
+    }
+}
+impl<T : Div> Div<T> for Matrix<T>
+{
+    type Output = Matrix<T>;
+    fn div(self, rhs: T) -> Matrix<T>{
         &self/rhs
     }
 }
+*/
 
 
+*/
 
-impl Div<&Matrix> for f64
+
+//impl<T : Div> Div<Matrix<T>> for T { type Output = Matrix<T>; fn div(self, rhs: Matrix<T>) -> Matrix<T>{self / &rhs} }
+
+/*
+
+
+impl Div<f64> for &Matrix
 {
     type Output = Matrix;
-    fn div(self, rhs: &Matrix) -> Matrix {
-
-        // Need to verify that there is no zero in the Matrix
-        match rhs {
-            Matrix::Int(a)=>Matrix::Float(MatrixStruct::<f64>{ values: a.values.iter().map(|v| self/(*v as f64)).collect(), shape:a.shape}),
-            Matrix::Float(a)=>Matrix::Float(MatrixStruct::<f64>{ values: a.values.iter().map(|v| self / *v).collect(), shape:a.shape}),
-            Matrix::Bool(a)=>Matrix::Bool(MatrixStruct::<bool>{ values: vec![false], shape:(1,1)}),
-            Matrix::Null=>Matrix::Bool(MatrixStruct::<bool>{ values: vec![false], shape:(1,1)}),
-        }
-        
+    fn div(self, rhs: f64) -> Matrix<T>{
+        (1.0/(rhs))*self
     }
 }
-
-impl Div<Matrix> for f64 { type Output = Matrix; fn div(self, rhs: Matrix) -> Matrix {self / &rhs} }
-impl Div<&Matrix> for i32{ type Output = Matrix; fn div(self, rhs: &Matrix) -> Matrix {self as f64 / rhs} }
-impl Div<Matrix> for i32{ type Output = Matrix; fn div(self, rhs: Matrix) -> Matrix {self as f64 / &rhs} }
-
-
+impl Div<f64> for Matrix
+{
+    type Output = Matrix;
+    fn div(self, rhs: f64) -> Matrix<T>{
+        (1.0/(rhs))*&self
+    }
+}
 
 
 
@@ -100,7 +140,7 @@ impl Div<Matrix> for i32{ type Output = Matrix; fn div(self, rhs: Matrix) -> Mat
 impl Mul<f64> for &Matrix
 {
     type Output = Matrix;
-    fn mul(self, rhs: f64) -> Matrix {
+    fn mul(self, rhs: f64) -> Matrix<T>{
         match self {
             Matrix::Int(a)=> Matrix::Float(MatrixStruct::<f64>{ values: a.values.iter().map(|v| (*v as f64) * rhs).collect(), shape:a.shape}),
             Matrix::Float(a)=> Matrix::Float(MatrixStruct::<f64>{ values: a.values.iter().map(|v| *v * rhs).collect(), shape:a.shape}),
@@ -122,7 +162,7 @@ impl Mul<Matrix> for f64 {
         &rhs*(self)
     }
 }
-impl Mul<f64> for Matrix {
+impl Mul<f64> for Matrix<T>{
     type Output = Matrix;
     fn mul(self, rhs: f64) -> Matrix{
         rhs*(&self)
@@ -134,26 +174,11 @@ impl Mul<f64> for Matrix {
 
 
 
-impl Div<f64> for &Matrix
-{
-    type Output = Matrix;
-    fn div(self, rhs: f64) -> Matrix {
-        (1.0/(rhs))*self
-    }
-}
-impl Div<f64> for Matrix
-{
-    type Output = Matrix;
-    fn div(self, rhs: f64) -> Matrix {
-        (1.0/(rhs))*&self
-    }
-}
-
 
 impl Add<i32> for &Matrix
 {
     type Output = Matrix;
-    fn add(self, rhs: i32) -> Matrix {
+    fn add(self, rhs: i32) -> Matrix<T>{
         match self {
             Matrix::Int(a)=> Matrix::Int(MatrixStruct::<i32>{ values: a.values.iter().map(|v| *v + rhs).collect(), shape:a.shape}),
             Matrix::Float(a)=> Matrix::Float(MatrixStruct::<f64>{ values: a.values.iter().map(|v| *v + (rhs as f64)).collect(), shape:a.shape}),
@@ -164,19 +189,19 @@ impl Add<i32> for &Matrix
 }
 impl Add<&Matrix> for i32 {
     type Output = Matrix;
-    fn add(self, rhs: &Matrix) -> Matrix {
+    fn add(self, rhs: &Matrix) -> Matrix<T>{
         rhs + (self)
     }
 }
 impl Add<Matrix> for i32 {
     type Output = Matrix;
-    fn add(self, rhs: Matrix) -> Matrix {
+    fn add(self, rhs: Matrix) -> Matrix<T>{
         &rhs + (self)
     }
 }
-impl Add<i32> for Matrix {
+impl Add<i32> for Matrix<T>{
     type Output = Matrix;
-    fn add(self, rhs: i32) -> Matrix {
+    fn add(self, rhs: i32) -> Matrix<T>{
         rhs + &self
     }
 }
@@ -190,7 +215,7 @@ impl Sub<i32> for &Matrix
 }
 impl Sub<&Matrix> for i32 {
     type Output = Matrix;
-    fn sub(self, rhs: &Matrix) -> Matrix {
+    fn sub(self, rhs: &Matrix) -> Matrix<T>{
         (-1)*&(rhs - self)
     }
 }
@@ -203,7 +228,7 @@ impl Sub<i32> for Matrix
 }
 impl Sub<Matrix> for i32 {
     type Output = Matrix;
-    fn sub(self, rhs: Matrix) -> Matrix {
+    fn sub(self, rhs: Matrix) -> Matrix<T>{
         -1*&rhs + self
     }
 }
@@ -214,7 +239,7 @@ impl Sub<Matrix> for i32 {
 impl Add<f64> for &Matrix
 {
     type Output = Matrix;
-    fn add(self, rhs: f64) -> Matrix {
+    fn add(self, rhs: f64) -> Matrix<T>{
         match self {
             Matrix::Int(a)=> Matrix::Float(MatrixStruct::<f64>{ values: a.values.iter().map(|v| (*v as f64) + rhs).collect(), shape:a.shape}),
             Matrix::Float(a)=> Matrix::Float(MatrixStruct::<f64>{ values: a.values.iter().map(|v| *v + rhs).collect(), shape:a.shape}),
@@ -225,21 +250,21 @@ impl Add<f64> for &Matrix
 }
 impl Add<&Matrix> for f64 {
     type Output = Matrix;
-    fn add(self, rhs: &Matrix) -> Matrix {
+    fn add(self, rhs: &Matrix) -> Matrix<T>{
         rhs+(self)
     }
 }
 
 impl Add<Matrix> for f64 {
     type Output = Matrix;
-    fn add(self, rhs: Matrix) -> Matrix {
+    fn add(self, rhs: Matrix) -> Matrix<T>{
         &rhs+(self)
     }
 }
 
-impl Add<f64> for Matrix {
+impl Add<f64> for Matrix<T>{
     type Output = Matrix;
-    fn add(self, rhs: f64) -> Matrix {
+    fn add(self, rhs: f64) -> Matrix<T>{
         rhs+(&self)
     }
 }
@@ -249,7 +274,7 @@ impl Add<f64> for Matrix {
 impl Sub<f64> for &Matrix
 {
     type Output = Matrix;
-    fn sub(self, rhs: f64) -> Matrix {
+    fn sub(self, rhs: f64) -> Matrix<T>{
        self + (-1.0)*rhs
     }
 }
@@ -263,7 +288,7 @@ impl Sub<&Matrix> for f64 {
 impl Sub<f64> for Matrix
 {
     type Output = Matrix;
-    fn sub(self, rhs: f64) -> Matrix {
+    fn sub(self, rhs: f64) -> Matrix<T>{
        &self + (-1.0)*rhs
     }
 }
@@ -277,26 +302,26 @@ impl Sub<Matrix> for f64 {
 
 
 
-impl Add<Matrix> for Matrix {
+impl Add<Matrix> for Matrix<T>{
     type Output = Matrix;
-    fn add(self, rhs: Matrix) -> Matrix {&self + &rhs}
+    fn add(self, rhs: Matrix) -> Matrix<T>{&self + &rhs}
 }
 
-impl Add<Matrix> for &Matrix {
+impl Add<Matrix> for &Matrix<T>{
     type Output = Matrix;
-    fn add(self, rhs: Matrix) -> Matrix {self + &rhs}
+    fn add(self, rhs: Matrix) -> Matrix<T>{self + &rhs}
 }
-impl Add<&Matrix> for Matrix {
+impl Add<&Matrix> for Matrix<T>{
     type Output = Matrix;
-    fn add(self, rhs: &Matrix) -> Matrix {&self + rhs}
+    fn add(self, rhs: &Matrix) -> Matrix<T>{&self + rhs}
 }
 
 impl Add<&Matrix> for &Matrix
 {
     type Output = Matrix;
-    fn add(self, rhs: &Matrix) -> Matrix {
+    fn add(self, rhs: &Matrix) -> Matrix<T>{
         if self.get_shape() != rhs.get_shape() {
-            println!("\nCannot add both Matrix because shapes are different.\n");
+            println!("\nCannot add both Matrix<T>because shapes are different.\n");
             return Matrix::Null
         }
 
@@ -360,43 +385,12 @@ impl Add<&Matrix> for &Matrix
 
 
 
-impl Div<&Matrix> for &Matrix
-{
-    type Output = Matrix;
-    fn div(self, rhs: &Matrix) -> Matrix {
-        if self.get_shape() != rhs.get_shape() {
-            println!("\nCannot divise element by element on both Matrix because shapes are different.\n");
-            return Matrix::Null
-        }
-        (1.0/rhs) * self
-    }
-}
-
-
-impl Div<Matrix> for &Matrix
-{
-    type Output = Matrix;
-    fn div(self, rhs: Matrix) -> Matrix {
-        self / &rhs
-    }
-}
-impl Div<&Matrix> for Matrix
-{
-    type Output = Matrix;
-    fn div(self, rhs: &Matrix) -> Matrix {
-        &self / rhs
-    }
-}
-
-
-
-
 
 
 impl Sub<Matrix> for Matrix
 {
     type Output = Matrix;
-    fn sub(self, rhs: Matrix) -> Matrix {
+    fn sub(self, rhs: Matrix) -> Matrix<T>{
         &self + (-1) * &rhs
     }
 }
@@ -404,7 +398,7 @@ impl Sub<Matrix> for Matrix
 impl Sub<&Matrix> for &Matrix
 {
     type Output = Matrix;
-    fn sub(self, rhs: &Matrix) -> Matrix {
+    fn sub(self, rhs: &Matrix) -> Matrix<T>{
         self + (-1) * rhs
     }
 }
@@ -412,14 +406,14 @@ impl Sub<&Matrix> for &Matrix
 impl Sub<&Matrix> for Matrix
 {
     type Output = Matrix;
-    fn sub(self, rhs: &Matrix) -> Matrix {
+    fn sub(self, rhs: &Matrix) -> Matrix<T>{
         &self - rhs
     }
 }
 impl Sub<Matrix> for &Matrix
 {
     type Output = Matrix;
-    fn sub(self, rhs: Matrix) -> Matrix {
+    fn sub(self, rhs: Matrix) -> Matrix<T>{
         self - &rhs
     }
 }
@@ -430,9 +424,9 @@ impl Sub<Matrix> for &Matrix
 impl Mul<&Matrix> for &Matrix
 {
     type Output = Matrix;
-    fn mul(self, rhs: &Matrix) -> Matrix {
+    fn mul(self, rhs: &Matrix) -> Matrix<T>{
         if self.get_shape() != rhs.get_shape() {
-            println!("\nCannot multiplicate both Matrix because shapes are different.\n");
+            println!("\nCannot multiplicate both Matrix<T>because shapes are different.\n");
             return Matrix::Null
         }
 
@@ -490,11 +484,11 @@ impl Mul<&Matrix> for &Matrix
         }
     }
 }
-impl Mul<&Matrix> for Matrix { type Output = Matrix; fn mul(self, rhs: &Matrix) -> Matrix {&self * rhs} }
-impl Mul<Matrix> for Matrix { type Output = Matrix; fn mul(self, rhs: Matrix) -> Matrix {&self * &rhs} }
+impl Mul<&Matrix> for Matrix<T>{ type Output = Matrix; fn mul(self, rhs: &Matrix) -> Matrix<T>{&self * rhs} }
+impl Mul<Matrix> for Matrix<T>{ type Output = Matrix; fn mul(self, rhs: Matrix) -> Matrix<T>{&self * &rhs} }
 
 
 
-
+*/
 
 
