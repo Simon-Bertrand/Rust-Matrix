@@ -11,16 +11,10 @@ fn main() {
     let n=5;
     let m = 5;
 
-    /*
-    let binary = &Matrix::rand_binary(n,m);
-    let id = &Matrix::eye(m,"i32");
-    let tri = &Matrix::tri(m, 0);
-    let linstep = &Matrix::linstep(m, n, 1);
     
-    tri.show();
+    let fill = &Matrix::fill(5,5,5);
 
-    tri.col(1).show();
-    */
-    println!("{}", <Matrix<i32> as Constructors<i32>>::fill(n,m, 0 as i32));
+    println!("{}", fill);
+    println!("{}", fill*5);
 
 }

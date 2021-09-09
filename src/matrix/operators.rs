@@ -4,6 +4,7 @@ use std::ops::Sub;
 use std::ops::Div;
 
 
+
 use crate::matrix::Matrix;
 
 impl<T : Mul + Copy> Mul<T> for &Matrix<T>
@@ -20,14 +21,36 @@ impl<T : Mul + Copy> Mul<T> for &Matrix<T>
             shape:self.shape}    
         }
 }
-/*
-impl<T> Mul<&Matrix<T>> for T {
-    type Output = Matrix<T>;
-    fn mul(&self, rhs: &Matrix<T>) -> Matrix<T>{
-        rhs*(*self)
-    }
+impl<T : Mul + Copy> Mul<T> for Matrix<T>
+{
+    type Output = Matrix<T::Output>;
+    fn mul(self, rhs: T) -> Matrix<T::Output> {&self * rhs}
 }
 
+
+
+macro_rules! sub_impl {
+    ($($t:ty)*) => ($(
+        impl Mul<&Matrix<$t>> for $t {
+            type Output = Matrix<$t>;
+            fn mul(self, rhs: &Matrix<$t>) -> Matrix<$t>{
+                rhs*(self)
+            }
+        }
+        impl Mul<Matrix<$t>> for $t {
+            type Output = Matrix<$t>;
+            fn mul(self, rhs: Matrix<$t>) -> Matrix<$t>{
+                &rhs*(self)
+            }
+        }
+    )*)
+}
+
+sub_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
+
+/*
+
+T::Output
 
 impl<T : Mul> Mul<Matrix<T>> for T {
     type Output = Matrix<T>;

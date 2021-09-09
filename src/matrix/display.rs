@@ -2,6 +2,9 @@ use crate::matrix::*;
 use crate::utils::functions::count_digits;
 
 
+fn print_type_of<T>(_: &T) {
+    print!("- {} ", std::any::type_name::<T>())
+}
 
 impl<T : std::fmt::Display> std::fmt::Display for Matrix<T> {
     fn fmt(&self, _f: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -19,7 +22,10 @@ impl<T : std::fmt::Display> std::fmt::Display for Matrix<T> {
                 i+=1;
             }
             println!("{val:>width$}", val="|", width=(spaces as usize));
-            Ok(println!("- Type ({},{})", self.shape.0, self.shape.1))
+            Ok({
+                print_type_of(self.values.iter().nth(0).expect("Type not found"));
+                println!("({},{}) -", self.shape.0, self.shape.1)}
+            )
     }
 }
 
