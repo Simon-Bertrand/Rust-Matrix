@@ -8,7 +8,7 @@ fn print_type_of<T>(_: &T) {
 
 impl<T : std::fmt::Display> std::fmt::Display for Matrix<T> {
     fn fmt(&self, _f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        let spaces = 1 + count_digits(3.0);
+        let spaces = 1 + count_digits(2.0);
             let mut i=0;
             println!("");
             print!("|");

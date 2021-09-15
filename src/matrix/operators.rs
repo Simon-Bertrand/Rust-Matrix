@@ -5,8 +5,8 @@ use std::ops::Div;
 
 
 
-use crate::matrix::Matrix;
-
+use crate::matrix::*;
+use crate::matrix::constructors::Constructors;
 
 
 impl<T : Mul + Copy> Mul<T> for &Matrix<T>
@@ -145,6 +145,33 @@ sub_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
 
 
 
+
+
+
+
+
+impl<T : Div + Copy> Div<&Matrix<T>> for &Matrix<T> {
+    type Output = Matrix<T::Output>;
+    fn div(self, rhs: &Matrix<T>) -> Matrix<T::Output>{
+            // Need zero division check       
+            Matrix::<T::Output>{ 
+                values: {
+                    let mut r: Vec<T::Output> = Vec::with_capacity(((&rhs).shape.0*(*rhs).shape.1) as usize); 
+                    for (i,el) in (&rhs).values.iter().enumerate() {
+                        r.push(*(&self).values.get(i).expect("Indice not found.") / *el)
+                    }
+                    r},
+                shape:(&rhs).shape
+            }    
+    }
+}
+
+
+impl<T : Div + Copy> Div<Matrix<T>> for &Matrix<T> { type Output = Matrix<T::Output>; fn div(self, rhs: Matrix<T>) -> Matrix<T::Output>{ self / &rhs }}
+impl<T : Div + Copy> Div<&Matrix<T>> for Matrix<T> { type Output = Matrix<T::Output>; fn div(self, rhs: &Matrix<T>) -> Matrix<T::Output>{ &self / rhs }}
+impl<T : Div + Copy> Div<Matrix<T>> for Matrix<T> { type Output = Matrix<T::Output>; fn div(self, rhs: Matrix<T>) -> Matrix<T::Output>{ &self / &rhs }}
+
+
 impl<T : Div + Copy> Div<T> for &Matrix<T>
 {
     type Output = Matrix<T::Output>;
@@ -159,6 +186,12 @@ impl<T : Div + Copy> Div<T> for &Matrix<T>
             shape:self.shape}    
         }
 }
+
+
+
+
+
+
 impl<T : Div + Copy> Div<T> for Matrix<T>
 {
     type Output = Matrix<T::Output>;
@@ -170,13 +203,13 @@ macro_rules! sub_impl {
         impl Div<&Matrix<$t>> for $t {
             type Output = Matrix<$t>;
             fn div(self, rhs: &Matrix<$t>) -> Matrix<$t>{
-                rhs / (self)
+                &Matrix::fill(5,5,self) / rhs
             }
         }
         impl Div<Matrix<$t>> for $t {
             type Output = Matrix<$t>;
             fn div(self, rhs: Matrix<$t>) -> Matrix<$t>{
-                &rhs / (self)
+                &Matrix::fill(5,5,self) / &rhs
             }
         }
     )*)

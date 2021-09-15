@@ -3,7 +3,7 @@
 
 pub mod constructors;
 mod display;
-mod matrix;
+pub mod matrix;
 mod operators;
 
 

@@ -12,9 +12,11 @@ fn main() {
     let m = 5;
 
     
-    let fill = &Matrix::fill(5,5,5);
+    let fill = &Matrix::fill(5,5,3.0);
+    let ones = &Matrix::fill(5,5,1.0);
+    let zeros = &Matrix::fill(5,5,0);
 
+    println!("{}",5.0*ones/ fill);
     println!("{}", fill);
-    println!("{}", fill*5);
 
 }
