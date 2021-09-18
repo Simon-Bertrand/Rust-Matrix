@@ -1,6 +1,9 @@
 use crate::matrix::*;
 
 
+use std::ops::Mul;
+use std::ops::Add;
+
 
 
 
@@ -73,85 +76,35 @@ impl Matrix<i32> {
 }
 
 
-/*
 
-impl Matrix {
-    
-    pub fn sprod(&self, m : &Matrix){
-        if !(self.is_col() || self.is_row()) {
 
-        }
-        else if !(m.is_col() || m.is_row()){
-
-        }
-        else {
-
-        }
-
-    }
-    
-    pub fn dot(&self, m: &Matrix) -> Matrix {
-        if self.get_shape().1 != m.get_shape().0 {
+impl<T : Mul + Add> Matrix<T> {
+    pub fn dot(&self, m: &Matrix<T>) -> Matrix<T> {
+        if self.shape.1 != m.shape.0 {
             eprintln!("\nfn dot(&self, M: &Matrix) >>> The shapes are not compatible for matrix product.\n");
             std::process::exit(-1);
         }
-
-        let len = (self.get_shape().1* m.get_shape().0) as usize;
-        match &self {
-            Matrix::Int(b)=>{
-                match m {
-                Matrix::Int(a)=>{
-                    Matrix::Int(MatrixStruct::<i32>{values:{let mut r : Vec<i32> = Vec::with_capacity(len);
-                        for i in 0..self.get_shape().0 {
-                            for j in 0..self.get_shape().1 {
-                                r.push(self.row(i).sprod(&m.col(j)) as i32);
-                            }
-                        }
-                    r},
-                    shape:(self.get_shape().0, m.get_shape().1)})
-                },
-                Matrix::Float(a)=>{Matrix::Float(MatrixStruct::<f64>{values:{let mut r : Vec<f64> = Vec::with_capacity(len);
-                    for i in 0..self.get_shape().0 {
-                        for j in 0..self.get_shape().1 {
-                            r.push(self.row(i).sprod(&m.col(j)));
-                        }
-                    }
-                r},
-                shape:(self.get_shape().0, m.get_shape().1)})
+        let len = (self.shape.1* m.shape.0) as usize;
+        Matrix::<T> {
+            values:{
+                let mut r:Vec<T>= Vec::with_capacity(len); 
+                for k in 0..self.values.len() {
+                    r.push({
+                        let mut s : T::Output;
+                        for i in 0..self.shape.1 {
+                            s = s + self.values.chunks(self.shape.1 as usize).nth(0).expect("")[0] * m.values.chunks(m.shape.1 as usize).nth(0).expect("")[0]
+                        } s
+                    })
+                } r
             },
-                Matrix::Bool(a)=>Matrix::Null,
-                Matrix::Null=>Matrix::Null,
-            }},
-            Matrix::Float(b)=>{
-                match m {
-                Matrix::Int(a)=> Matrix::Float(MatrixStruct::<f64>{values:{let mut r : Vec<f64> = Vec::with_capacity(len);
-                    for i in 0..self.get_shape().0 {
-                        for j in 0..self.get_shape().1 {
-                            r.push(self.row(i).sprod(&m.col(j)));
-                        }
-                    }
-                r},
-                shape:(self.get_shape().0, m.get_shape().1)}),
-
-                Matrix::Float(a)=> Matrix::Float(MatrixStruct::<f64>{values:{let mut r : Vec<f64> = Vec::with_capacity(len);
-                    for i in 0..self.get_shape().0 {
-                        for j in 0..self.get_shape().1 {
-                            r.push(self.row(i).sprod(&m.col(j)));
-                        }
-                    }
-                r},
-                shape:(self.get_shape().0, m.get_shape().1)}),
-            
-                Matrix::Bool(a)=>Matrix::Null,
-                Matrix::Null=>Matrix::Null,}
-            },
-            Matrix::Bool(b)=>Matrix::Null,
-            Matrix::Null=>Matrix::Null,
+            shape: (self.shape.0,m.shape.1)
         }
+ 
     }
 }
 
-*/
+
+
 
 impl<T : std::cmp::PartialOrd<T>> Matrix<T> {
     pub fn max(&self) -> &T {

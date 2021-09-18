@@ -53,7 +53,24 @@ sub_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
 
 
 
+impl<T : Add + Copy> Add<&Matrix<T>> for &Matrix<T>
+{
+    type Output = Matrix<T::Output>;
+    fn add(self, rhs: &Matrix<T>) -> Matrix<T::Output> {
+        Matrix::<T::Output>{ 
+            values: {
+                let mut r: Vec<T::Output> = Vec::with_capacity(((&self).shape.0*(&self).shape.1) as usize); 
+                for (i,el) in (&self).values.iter().enumerate() {
+                    r.push(*el + *rhs.values.get(i).expect("Indice not found"));
+                }
+                r},
+            shape:self.shape}    
+        }
+}
 
+impl<T : Add + Copy> Add<Matrix<T>> for &Matrix<T> { type Output = Matrix<T::Output>; fn add(self, rhs: Matrix<T>) -> Matrix<T::Output>{ self + &rhs }}
+impl<T : Add + Copy> Add<&Matrix<T>> for Matrix<T> { type Output = Matrix<T::Output>; fn add(self, rhs: &Matrix<T>) -> Matrix<T::Output>{ &self + rhs }}
+impl<T : Add + Copy> Add<Matrix<T>> for Matrix<T> { type Output = Matrix<T::Output>; fn add(self, rhs: Matrix<T>) -> Matrix<T::Output>{ &self + &rhs }}
 
 
 impl<T : Add + Copy> Add<T> for &Matrix<T>
@@ -101,6 +118,24 @@ sub_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
 
 
 
+impl<T : Sub + Copy> Sub<&Matrix<T>> for &Matrix<T>
+{
+    type Output = Matrix<T::Output>;
+    fn sub(self, rhs: &Matrix<T>) -> Matrix<T::Output> {
+        Matrix::<T::Output>{ 
+            values: {
+                let mut r: Vec<T::Output> = Vec::with_capacity(((&self).shape.0*(&self).shape.1) as usize); 
+                for (i,el) in (&self).values.iter().enumerate() {
+                    r.push(*el - *rhs.values.get(i).expect("Indice not found"));
+                }
+                r},
+            shape:self.shape}    
+        }
+}
+
+impl<T : Sub + Copy> Sub<Matrix<T>> for &Matrix<T> { type Output = Matrix<T::Output>; fn sub(self, rhs: Matrix<T>) -> Matrix<T::Output>{ self - &rhs }}
+impl<T : Sub + Copy> Sub<&Matrix<T>> for Matrix<T> { type Output = Matrix<T::Output>; fn sub(self, rhs: &Matrix<T>) -> Matrix<T::Output>{ &self - rhs }}
+impl<T : Sub + Copy> Sub<Matrix<T>> for Matrix<T> { type Output = Matrix<T::Output>; fn sub(self, rhs: Matrix<T>) -> Matrix<T::Output>{ &self - &rhs }}
 
 impl<T : Sub + Copy> Sub<T> for &Matrix<T>
 {
@@ -186,10 +221,6 @@ impl<T : Div + Copy> Div<T> for &Matrix<T>
             shape:self.shape}    
         }
 }
-
-
-
-
 
 
 impl<T : Div + Copy> Div<T> for Matrix<T>
