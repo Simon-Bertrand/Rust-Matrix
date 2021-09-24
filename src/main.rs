@@ -28,4 +28,5 @@ fn main() {
     *eyes.get_mut(1,1) =1;
     println!("{}", (ones.dot(eye)));
 
+    Matrix::<f64>::fill_tri(5,5.0,-2).flatten().show();
 }

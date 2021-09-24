@@ -7,13 +7,6 @@ use std::ops::Add;
 
 
 
-
-
-
-
-
-
-
 impl<T> Matrix<T> {
     pub fn get(&self, i:i32, j:i32) -> &T {
         if i<0 || i>= self.shape.0 {
@@ -109,14 +102,6 @@ impl<T: std::clone::Clone + Copy> Matrix<T> {
     
 }
 
-/*
-impl Matrix<i32> {
-    pub fn convert_to_float(self, type_ : &str) -> Matrix<f64> {
-        Matrix::<f64>{values :{ let mut r:Vec<f64>= Vec::new(); for i in 0..self.values.len() {r.push(self.values[i] as f64)} r}, shape: self.shape}
-    }
-}
-*/
-
 
 use std::mem;
 impl<T : Mul<Output = T> + Add<Output = T> + Copy> Matrix<T> {
@@ -141,7 +126,6 @@ impl<T : Mul<Output = T> + Add<Output = T> + Copy> Matrix<T> {
                         })
                     }
                 }
-
                 r
             },
             shape: (self.shape.0,m.shape.1)
@@ -151,6 +135,27 @@ impl<T : Mul<Output = T> + Add<Output = T> + Copy> Matrix<T> {
 }
 
 
+
+impl<T : Copy> Matrix<T> {
+    pub fn transpose(&self) -> Matrix<T> {
+        Matrix::<T> {
+            values:{
+                let mut result = Vec::with_capacity((self.shape.0*self.shape.1) as usize);
+                for i in 0..self.shape.1 {for el in self.col_iter(i) {result.push(*el)}}
+                result
+            },
+            shape: (self.shape.1, self.shape.0)
+        }
+    }
+
+    pub fn flatten(&self) -> Matrix<T> {
+        Matrix::<T> {
+            values:self.values.clone(),
+            shape: (1, self.shape.1*self.shape.0)
+        }
+    }
+
+}
 
 
 impl<T : std::cmp::PartialOrd<T>> Matrix<T> {
