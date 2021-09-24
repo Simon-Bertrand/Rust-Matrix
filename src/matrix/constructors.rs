@@ -10,6 +10,7 @@ trait Display {
 
 pub trait Constructors<T> {
     fn fill(shape1 : i32, shape2 : i32, fill_value :T) -> Self;
+
 }
 
 
@@ -17,7 +18,24 @@ impl<T : Clone> Constructors<T> for Matrix<T> {
     fn fill(shape1 : i32, shape2 : i32, fill_value : T) -> Matrix<T> {
         Matrix::<T>{values : vec![fill_value; (shape1*shape2) as usize], shape:(shape1,shape2)}
     }
+
 }
+
+
+
+macro_rules! sub_impl {
+    ($($t:ty)*) => ($(
+        impl Matrix<$t> {
+            pub fn fill_diagonal(shape : i32, value : $t) -> Matrix<$t>{
+                let mut result = Matrix::fill(shape,shape,0 as $t);
+                for k in 0..shape {*result.get_mut(k,k) =value;}
+                result
+            }
+        }
+    )*)
+}
+
+sub_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
 
 
 
