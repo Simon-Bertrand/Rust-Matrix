@@ -104,7 +104,7 @@ impl<T: std::clone::Clone + Copy> Matrix<T> {
 
 
 use std::mem;
-impl<T : Mul<Output = T> + Add<Output = T> + Copy> Matrix<T> {
+impl<T : Mul<Output = T> + Add<Output = T> + Copy + std::fmt::Display> Matrix<T> {
 
     pub fn dot(&self, m: &Matrix<T>) -> Matrix<T> {
         if self.shape.1 != m.shape.0 {
@@ -114,12 +114,12 @@ impl<T : Mul<Output = T> + Add<Output = T> + Copy> Matrix<T> {
         Matrix::<T> {
             values:{
                 let mut r:Vec<T>= Vec::with_capacity((self.shape.1*m.shape.0) as usize); 
-                for i in 0..self.shape.1 {
-                    for j in 0..m.shape.0 {
+                for i in 0..self.shape.0 {
+                    for j in 0..m.shape.1 {
                         r.push({
                             let mut sum : T = unsafe { mem::zeroed() };
-                                for k in 0..(self.shape.1 as usize) {
-                                    sum = sum + self.row_iter(i)[k]* (*m.col_iter(j).nth(k).expect("Indice not found"))
+                                for k in 0..(m.shape.0 as usize) {
+                                    sum = sum + *self.get(i,k as i32)* *m.get(k as i32,j);
                                     
                                 } 
                                 sum
@@ -172,7 +172,7 @@ impl<T : std::cmp::PartialOrd<T>> Matrix<T> {
 
 
 impl<T> Matrix<T> {
-    fn is_row(&self) -> bool {
+    pub fn is_row(&self) -> bool {
         if self.shape.0 == 1 {
             return true;
         }
@@ -180,7 +180,7 @@ impl<T> Matrix<T> {
             return false;
         }
     }
-    fn is_col(&self) -> bool {
+    pub fn is_col(&self) -> bool {
         if self.shape.1 == 1 {
             return true;
         }
