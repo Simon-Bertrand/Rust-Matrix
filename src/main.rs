@@ -16,17 +16,14 @@ fn main() {
     let ones = &Matrix::fill(5,5,1);
     let zeros = &Matrix::fill(5,5,0);
 
-    let eye = &Matrix::<i32>::fill_diagonal(5,5);
-    for el in eye.col_iter(0) {
-        println!("{}", el);
-    }
-    println!("{}", eye);
+    let permut: Matrix<f64> = Matrix::<f64> {values: vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 0.0], shape:(3,3)};
 
-    let mut eyes =Matrix::fill(5,5,0);
-    println!("{}", &eyes);
+   
 
-    *eyes.get_mut(1,1) =1;
-    println!("{}", (ones.dot(eye)));
 
-    Matrix::<f64>::fill_tri(5,5.0,-2).flatten().show();
+
+
+
+
+
 }

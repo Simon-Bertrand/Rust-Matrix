@@ -5,11 +5,13 @@ pub mod constructors;
 mod display;
 pub mod matrix;
 mod operators;
+pub mod decomposition;
+mod math;
 
 
 pub struct Matrix<T> {
-    values: Vec<T>,
-    shape : (i32,i32),
+    pub values: Vec<T>,
+    pub shape : (i32,i32),
 }
 
 

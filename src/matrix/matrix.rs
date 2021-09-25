@@ -62,7 +62,7 @@ impl<T> Matrix<T> {
        else {
             return self.values[j as usize..].iter().step_by(self.shape.0 as usize)
         }
-    }
+    }       
 
     pub fn col_iter_mut(&mut self, j:i32) ->  std::iter::StepBy<std::slice::IterMut<'_, T>>  {
         if j<0 || j>= self.shape.1 {
@@ -121,7 +121,8 @@ impl<T : Mul<Output = T> + Add<Output = T> + Copy> Matrix<T> {
                                 for k in 0..(self.shape.1 as usize) {
                                     sum = sum + self.row_iter(i)[k]* (*m.col_iter(j).nth(k).expect("Indice not found"))
                                     
-                                } sum
+                                } 
+                                sum
 
                         })
                     }
