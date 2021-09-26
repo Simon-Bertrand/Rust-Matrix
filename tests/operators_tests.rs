@@ -8,6 +8,7 @@ fn matrix_addition_and_sub_with_reals() {
     let mat_ones: &Matrix<f64> = &Matrix::fill(3,3,1.0);
     assert_eq!(mat_twos - 1.0, *mat_ones, "Testing Mat_of_two - 1 = Mat_of_ones");
     assert_eq!(*mat_twos, mat_ones + 1.0, "Testing Mat_of_two = Mat_of_ones + 1");
+    
 }
 #[test]
 fn matrix_mul_and_div_with_reals() {

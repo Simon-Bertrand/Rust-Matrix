@@ -60,11 +60,26 @@ macro_rules! sub_impl {
                 }
                 x
             }
+
+            pub fn det(&self) -> $t {
+                if  (self.shape.1 != self.shape.0) {
+                    eprintln!("\nfn det(&self) >>> Matrix is not square to compute the determinant.");
+                    std::process::exit(-1);
+                }
+                else {
+                    let (matrix_l,matrix_u) = self.lu_decomposition();
+                    let mut val_det = 1 as $t;
+                    for k in 0..self.shape.0 {
+                        val_det *= matrix_l.get(k,k)*matrix_u.get(k,k);
+                    }
+                    val_det
+                }
+            }
         }
 )*)
 }
 
-sub_impl! {i8 i16 i32 i64 i128 f32 f64 }
+sub_impl! { f32 f64 }
 
 
 

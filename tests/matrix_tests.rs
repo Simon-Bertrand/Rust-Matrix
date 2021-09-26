@@ -16,4 +16,9 @@ fn resolve_system() {
     assert_eq!(mat_a.dot(&mat_a.resolve_system(&b)), b, "Testing A.x = b");
     assert_eq!(mat_a.resolve_system(&b), sol, "Testing x = sol");
 }
+#[test]
+fn determinant() {
+    let matrix_a: Matrix<f64> = Matrix::<f64> {values: vec![1.0,0.0,6.0,3.0,4.0,15.0,5.0,6.0,21.0], shape:(3,3)};
+    assert_eq!(matrix_a.det(), -18.0, "Testing det(A) = -18");
+}
 
