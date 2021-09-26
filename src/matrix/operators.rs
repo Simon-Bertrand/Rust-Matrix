@@ -2,11 +2,36 @@ use std::ops::Mul;
 use std::ops::Add;
 use std::ops::Sub;
 use std::ops::Div;
-
+use std::cmp::PartialEq;
 
 
 use crate::matrix::*;
 use crate::matrix::constructors::Constructors;
+
+
+macro_rules! sub_impl {
+    ($($t:ty)*) => ($(
+        impl PartialEq for Matrix<$t> {
+            fn eq(&self, other: &Self) -> bool {
+                if other.shape == self.shape {
+                    for (i,el) in self.values.iter().enumerate() {
+                        if *el != other.values[i] {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }
+        }
+    )*)
+}
+
+sub_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
+
+
 
 
 impl<T : Mul + Copy> Mul<T> for &Matrix<T>

@@ -25,10 +25,4 @@ fn main() {
 
     permut.resolve_system(&b);
  
-    
-
-
-
-
-
 }

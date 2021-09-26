@@ -1,9 +1,9 @@
 use crate::matrix::*;
 
 
-pub fn count_digits<T : std::string::ToString>(Matrix : &Matrix<T>) -> usize {
+pub fn count_digits<T : std::string::ToString>(matrix : &Matrix<T>) -> usize {
     let mut max_lenght: usize =0;
-    for el in Matrix.values.iter() {
+    for el in matrix.values.iter() {
         if el.to_string().len() > max_lenght {
 
             max_lenght = el.to_string().len();
