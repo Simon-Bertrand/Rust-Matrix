@@ -7,6 +7,8 @@ use std::ops::Add;
 
 
 
+
+
 impl<T> Matrix<T> {
     pub fn get(&self, i:i32, j:i32) -> &T {
         if i<0 || i>= self.shape.0 {
@@ -140,18 +142,14 @@ impl<T : Mul<Output = T> + Add<Output = T> + Copy + std::fmt::Display> Matrix<T>
 impl<T : Copy> Matrix<T> {
     pub fn transpose(&self) -> Matrix<T> {
         Matrix::<T> {
-            values:{
-                let mut result = Vec::with_capacity((self.shape.0*self.shape.1) as usize);
-                for i in 0..self.shape.1 {for el in self.col_iter(i) {result.push(*el)}}
-                result
-            },
+            values:self.values.clone(),
             shape: (self.shape.1, self.shape.0)
         }
     }
 
     pub fn flatten(&self) -> Matrix<T> {
         Matrix::<T> {
-            values:self.values.clone(),
+            values:(*self.values).to_vec(),
             shape: (1, self.shape.1*self.shape.0)
         }
     }
@@ -165,6 +163,13 @@ impl<T : std::cmp::PartialOrd<T>> Matrix<T> {
         for el in self.values.iter()  {if max < el  { max = el;}}
         max
     }
+}
+
+impl<T : Copy> Matrix<T> {
+    pub fn copy(&self) -> Matrix<T> {
+        Matrix::<T> {values:self.values.clone(),shape:self.shape.clone()}
+    }
+
 }
 
 

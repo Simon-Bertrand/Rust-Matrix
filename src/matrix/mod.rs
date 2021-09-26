@@ -6,6 +6,8 @@ mod display;
 pub mod matrix;
 mod operators;
 pub mod decomposition;
+pub mod transformations;
+
 mod math;
 
 #[derive(Debug)]
