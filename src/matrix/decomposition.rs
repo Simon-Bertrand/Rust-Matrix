@@ -1,7 +1,135 @@
 use crate::matrix::*;
 use crate::matrix::constructors::Constructors;
 
+use num_traits::Float;
+use num_traits::Bounded;
 
+use num_traits::cast::FromPrimitive;
+use num_traits::Zero;
+use num_traits::One;
+
+impl<T : Bounded> Matrix<T> {
+
+}
+
+impl<T : Bounded + Float + FromPrimitive + Copy> Matrix<T> {
+    pub fn round(mut self) -> Self{
+        for el in self.values.iter_mut() {
+                *el = el.round();
+        }
+        self
+    }
+    fn lu_permut(matrix_a : &mut Matrix<T>, col: i32, num_piv : &mut usize) -> i32{
+        let mut ind_max=col;
+        for i in (col+1)..matrix_a.shape.0{
+            if matrix_a.get(ind_max,col).abs()< matrix_a.get(i as i32,col).abs() {ind_max = i as i32;}
+        }
+        if ind_max!=col {*num_piv+=1}
+        matrix_a.swap(col, ind_max, true);
+        ind_max
+    }
+
+    pub fn lu_decomposition(&self) -> (Matrix<T>,Matrix<T>,Matrix<T>,usize){
+        if self.shape.0 != self.shape.1 {
+            eprintln!("\nfn LU_lower_generator(permuted_matrix : &Matrix<$t>, col : i32) >>> The matrix is not square.");
+            std::process::exit(-1);
+        }
+        else {
+        let mut num_piv : usize =  0;
+        let mut matrix_l = Matrix::<T>::fill(self.shape.0, self.shape.0, Zero::zero());
+        let mut matrix_u = Matrix::<T>::fill(self.shape.0, self.shape.0, Zero::zero());
+        let mut matrix_p = Matrix::<T>::fill_diagonal(self.shape.0, One::one());
+        let mut working_mat = self.copy();
+        for i in 0..working_mat.shape.0 {
+            matrix_p.swap(i,Matrix::<T>::lu_permut(&mut working_mat, i, &mut num_piv), true);
+            for k in i..working_mat.shape.0 {
+                let mut sum = Zero::zero();
+                for j in 0..i {
+                    sum= sum + *matrix_l.get(i,j) * *matrix_u.get(j,k);
+                }
+                *matrix_u.get_mut(i,k) = *working_mat.get(i,k) - sum;
+            }
+            for k in i ..working_mat.shape.0 {
+                if i==k {*matrix_l.get_mut(i,i) = One::one();} else{
+                    let mut sum = Zero::zero();
+                    for j in 0..i {
+                        sum= sum + *matrix_l.get(k,j) * *matrix_u.get(j,i);
+                    }
+                    *matrix_l.get_mut(k,i) = (*working_mat.get(k,i) - sum)/ *matrix_u.get(i,i);
+                }
+            }
+        }
+        (matrix_p, matrix_l,matrix_u, num_piv)
+        }
+    }
+    fn resolve_system_using_lu(&self, vect_b : &Matrix<T>, lu_result : &(Matrix<T>,Matrix<T>,Matrix<T>,usize)) -> Matrix<T> {
+        let  (matrix_p,matrix_l,matrix_u,_) =lu_result;
+
+        let mut y = Matrix::<T>::fill(self.shape.0, 1, Zero::zero());
+        let b = matrix_p.dot(&vect_b);
+        for ind_row in 0..y.shape.0 {
+            *y.get_mut(ind_row,0)={                    
+                let mut sum : T = *b.get(ind_row as i32,0);
+                for k in 0..=(ind_row-1) {
+                    sum = sum - *matrix_l.get(ind_row as i32,k as i32)**(y.get(k,0));
+                }sum}/ *matrix_l.get(ind_row as i32,ind_row as i32);
+        }
+
+        let mut x = Matrix::<T>::fill(self.shape.0, 1, Zero::zero());
+        for ind_row in (0..x.shape.0).rev() {
+        *x.get_mut(ind_row,0) = {
+            let mut sum : T = *y.get(ind_row as i32,0);
+            for k in (ind_row +1)..x.shape.0  {
+                sum = sum - (*matrix_u.get(ind_row,k as i32)**(x.get(k,0)));
+            }sum}/ *matrix_u.get(ind_row as i32, ind_row as i32);
+        }
+        x
+    }
+
+    pub fn resolve_system(&self, vect_b : &Matrix<T>) -> Matrix<T> {
+        if  !(vect_b.is_col()) || (self.shape.1 != vect_b.shape.0) {
+            eprintln!("\nfn resolve_system(matrix_a : Matrix<$t>, vect_b : Matrix<$t>) >>> Shapes are incompatible to resolve a system.");
+            std::process::exit(-1);
+        }
+        return self.resolve_system_using_lu(vect_b, &self.lu_decomposition())
+    }
+
+    pub fn invert(&self)  -> Matrix<T> {
+        let lu_decomp = &self.lu_decomposition();
+
+        let mut matrix_inv = Matrix::<T>::fill(0,0, Zero::zero());
+        
+        for i in 0..self.shape.0 {
+            let mut vect_ei = Matrix::<T>::fill(self.shape.0,1,Zero::zero());
+            *vect_ei.get_mut(i,0)=One::one();
+            matrix_inv.concat(&self.resolve_system_using_lu(&vect_ei, lu_decomp));
+        }
+        
+        matrix_inv
+    }
+
+    pub fn det(&self) -> T {
+        if  self.shape.1 != self.shape.0 {
+            eprintln!("\nfn det(&self) >>> Matrix is not square to compute the determinant.");
+            std::process::exit(-1);
+        }
+        else {
+            let (matrix_p,matrix_l,matrix_u,num_piv) = self.lu_decomposition();
+            let mut val_det : T = {if (num_piv)%2 == 0 { One::one()} else { FromPrimitive::from_i8(-1).expect("")}};
+            for k in 0..self.shape.0 {
+                val_det = val_det *  *matrix_l.get(k,k)**matrix_u.get(k,k);
+            }
+            val_det.round()
+            
+        }
+    }
+}
+
+
+
+
+
+/*
 macro_rules! sub_impl {
     ($($t:ty)*) => ($(
         impl Matrix<$t> {
@@ -128,7 +256,7 @@ macro_rules! sub_impl {
 sub_impl! { f32 f64 }
 
 
-
+*/
 
 
 

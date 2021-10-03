@@ -1,6 +1,8 @@
 use crate::matrix::*;
 
-
+use num_traits::Float;
+use num_traits::PrimInt;
+use num_traits::Bounded;
 use std::ops::Mul;
 use std::ops::Add;
 
@@ -106,7 +108,7 @@ impl<T: std::clone::Clone + Copy> Matrix<T> {
 
 
 use std::mem;
-impl<T : Mul<Output = T> + Add<Output = T> + Copy + std::fmt::Display> Matrix<T> {
+impl<T : Mul<Output = T> + Add<Output = T> + Copy> Matrix<T>{
 
     pub fn dot(&self, m: &Matrix<T>) -> Matrix<T> {
         if self.shape.1 != m.shape.0 {
@@ -136,6 +138,7 @@ impl<T : Mul<Output = T> + Add<Output = T> + Copy + std::fmt::Display> Matrix<T>
  
     }
 }
+
 
 
 
