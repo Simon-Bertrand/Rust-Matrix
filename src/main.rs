@@ -8,6 +8,6 @@ include!("mod.rs");
 use crate::matrix::constructors::Constructors;
 
 fn main() {
-  let mut matrix = Matrix::<f64>::fill_diagonal(5,3.0);
-  matrix.invert().show();
+  let mut matrix = Matrix::<i32>::fill_diagonal(5,3);
+  matrix.clone_to_ratio().dot(&matrix.invert()).show();
 }

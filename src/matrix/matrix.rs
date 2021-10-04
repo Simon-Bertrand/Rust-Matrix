@@ -107,8 +107,8 @@ impl<T: std::clone::Clone + Copy> Matrix<T> {
 }
 
 
-use std::mem;
-impl<T : Mul<Output = T> + Add<Output = T> + Copy> Matrix<T>{
+use num_traits::Zero;
+impl<T : Mul<Output = T> + Add<Output = T>+ std::fmt::Display + Copy + Zero> Matrix<T>{
 
     pub fn dot(&self, m: &Matrix<T>) -> Matrix<T> {
         if self.shape.1 != m.shape.0 {
@@ -116,15 +116,16 @@ impl<T : Mul<Output = T> + Add<Output = T> + Copy> Matrix<T>{
             std::process::exit(-1);
         }
         Matrix::<T> {
+            
             values:{
                 let mut r:Vec<T>= Vec::with_capacity((self.shape.1*m.shape.0) as usize); 
                 for i in 0..self.shape.0 {
                     for j in 0..m.shape.1 {
+                        
                         r.push({
-                            let mut sum : T = unsafe { mem::zeroed() };
+                            let mut sum : T = Zero::zero();
                                 for k in 0..(m.shape.0 as usize) {
                                     sum = sum + *self.get(i,k as i32)* *m.get(k as i32,j);
-                                    
                                 } 
                                 sum
 

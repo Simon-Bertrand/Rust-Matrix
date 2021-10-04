@@ -1,5 +1,6 @@
 use crate::matrix::*;
 
+use num_rational::Ratio;
 impl<T : Copy> Matrix<T> {
     pub fn swap(&mut self, i:i32, j:i32, axe:bool) -> &mut Matrix<T> {
         if axe {
@@ -69,3 +70,21 @@ impl<T : Copy> Matrix<T> {
     }
     }
 }
+
+
+
+macro_rules! sub_impl {
+    ($($t:ty)*) => ($(
+        impl Matrix<$t>{
+            pub fn clone_to_ratio(&self) -> Matrix<Ratio<$t>>{
+                Matrix::<Ratio<$t>> {
+                    values:self.values.iter().map(|v : &$t| Ratio::from_integer(*v)).collect(),
+                    shape:self.shape,
+                }
+            }
+        }
+        
+    )*)
+}
+
+sub_impl! {i32 i64}

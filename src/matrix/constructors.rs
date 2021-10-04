@@ -3,7 +3,7 @@ use crate::matrix::*;
 
 use rand::Rng;
 use std::vec;
-
+use num_traits::Zero;
 trait Display {
     fn show(&self);
 }
@@ -14,9 +14,9 @@ pub trait Constructors<T> {
 }
 
 
-impl<T : Clone> Constructors<T> for Matrix<T> {
+impl<T : Clone + Zero> Constructors<T> for Matrix<T> {
     fn new(shape1 : i32, shape2 : i32) -> Matrix<T> {
-        let zero : T = unsafe { mem::zeroed() };
+        let zero : T = Zero::zero();
         return Matrix::fill(shape1,shape2, zero);
     }
     fn fill(shape1 : i32, shape2 : i32, fill_value : T) -> Matrix<T> {
@@ -26,7 +26,7 @@ impl<T : Clone> Constructors<T> for Matrix<T> {
 }
 
 use std::mem;
-impl<T : Clone + Copy> Matrix<T> {
+impl<T : Clone + Copy + Zero> Matrix<T> {
     pub fn fill_diagonal(shape : i32, value : T) -> Matrix<T>{
         let mut result = Matrix::new(shape,shape);
         for k in 0..shape {*result.get_mut(k,k) =value;}
