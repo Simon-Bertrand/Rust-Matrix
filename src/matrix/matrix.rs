@@ -1,8 +1,5 @@
 use crate::matrix::*;
 
-use num_traits::Float;
-use num_traits::PrimInt;
-use num_traits::Bounded;
 use std::ops::Mul;
 use std::ops::Add;
 
@@ -139,6 +136,7 @@ impl<T : Mul<Output = T> + Add<Output = T>+ std::fmt::Display + Copy + Zero> Mat
  
     }
 }
+
 
 
 

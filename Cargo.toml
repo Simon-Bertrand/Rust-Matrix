@@ -9,3 +9,7 @@ edition = "2018"
 rand = "0.8.4"
 num-traits = "0.2.14"
 num-rational ="0.4"
+num-integer ="0.1.44"
+num ="0.4"
+csv = "1.1"
+

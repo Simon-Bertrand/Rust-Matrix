@@ -114,7 +114,7 @@ macro_rules! sub_impl {
                     std::process::exit(-1);
                 }
                 else {
-                    let (matrix_p,matrix_l,matrix_u,num_piv) = self.lu_decomposition();
+                    let (_matrix_p,matrix_l,matrix_u,num_piv) = self.lu_decomposition();
                     let mut val_det : $t = {if (num_piv as $t)%2.0 == 0.0 {1.0} else {-1.0}};
                     for k in 0..self.shape.0 {
                         val_det *= matrix_l.get(k,k)*matrix_u.get(k,k);
@@ -207,12 +207,12 @@ macro_rules! sub_impl {
                 x
             }
 
-            pub fn resolve_system(&self, vect_b : &Matrix<Ratio<$t>>) -> Matrix<Ratio<$t>> {
+            pub fn resolve_system(&self, vect_b : &Matrix<$t>) -> Matrix<Ratio<$t>> {
                 if  !(vect_b.is_col()) || (self.shape.1 != vect_b.shape.0) {
                     eprintln!("\nfn resolve_system(matrix_a : Matrix<$t>, vect_b : Matrix<$t>) >>> Shapes are incompatible to resolve a system.");
                     std::process::exit(-1);
                 }
-                return self.resolve_tri_using_lu(vect_b, &self.lu_decomposition())
+                return self.resolve_tri_using_lu(&vect_b.clone_to_ratio(), &self.lu_decomposition())
             }
 
             pub fn invert(&self)  -> Matrix<Ratio<$t>> {
@@ -237,7 +237,7 @@ macro_rules! sub_impl {
                     std::process::exit(-1);
                 }
                 else {
-                    let (matrix_p,matrix_l,matrix_u,num_piv) = self.lu_decomposition();
+                    let (_matrix_p,matrix_l,matrix_u,num_piv) = self.lu_decomposition();
                     let mut val_det : Ratio<$t> = {if (num_piv as $t)%2 == 0 {Ratio::new(1, 1)} else {Ratio::new(-1, 1)}};
                     for k in 0..self.shape.0 {
                         val_det *= matrix_l.get(k,k)*matrix_u.get(k,k);

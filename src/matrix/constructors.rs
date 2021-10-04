@@ -25,7 +25,6 @@ impl<T : Clone + Zero> Constructors<T> for Matrix<T> {
 
 }
 
-use std::mem;
 impl<T : Clone + Copy + Zero> Matrix<T> {
     pub fn fill_diagonal(shape : i32, value : T) -> Matrix<T>{
         let mut result = Matrix::new(shape,shape);
@@ -63,4 +62,26 @@ macro_rules! sub_impl {
 sub_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
 
 
-
+impl<T : std::str::FromStr > Matrix<T> {
+    pub fn from_csv(path : &str) -> Matrix<T> {
+        let mut rdr = csv::Reader::from_path(path).unwrap();
+        let mut data = Vec::<T>::new();
+        let mut n_cols : i32 = 0;
+        let mut n_rows : i32 = 0;
+        for rows in rdr.records() {
+            n_rows+=1;
+          match rows {
+            Ok(result) => {
+              n_cols = result.len() as i32;
+              for el in result.iter() {
+                
+                data.push(el.parse::<T>().ok().unwrap());
+              }
+          },
+            Err(_result) => {}
+          }
+            
+        }
+        Matrix::<T> {values : data, shape : (n_rows, n_cols)}
+    }
+}
