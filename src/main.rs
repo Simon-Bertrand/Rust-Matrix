@@ -5,8 +5,9 @@
 
 
 include!("mod.rs");
+use crate::matrix::constructors::Constructors;
 
 fn main() {
 
-  Matrix::<f64>::from_csv("./reg_data.csv").reglin_normal().show();
+  let ma = genericnum::<i128> { v: 5};
 }

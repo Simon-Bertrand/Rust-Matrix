@@ -2,23 +2,22 @@ use crate::matrix::*;
 use crate::matrix::constructors::Constructors;
 
 
+
+pub trait LUDecomposition<T> {
+    fn lu_permut(matrix_a : &mut Matrix<T>, col: i32, num_piv : &mut usize) -> i32;
+    fn lu_decomposition(&self) -> (Matrix<T>,Matrix<T>,Matrix<T>,usize);
+    fn resolve_tri_using_lu(&self, vect_b : &Matrix<T>, lu_result : &(Matrix<T>,Matrix<T>,Matrix<T>,usize)) -> Matrix<T>;
+    fn resolve_system(&self, vect_b : &Matrix<T>) -> Matrix<T>;
+    fn invert(&self)  -> Matrix<T>;
+    fn det(&self) -> T;
+}
+
 // LU Decomposition is only available for floats and signed integers. The integer part returns a Ratio Matrix to avoid the division of integers
+
 /* FLOAT */
 macro_rules! sub_impl {
     ($($t:ty)*) => ($(
-        impl Matrix<$t> {
-            pub fn round(mut self) -> Self{
-                for el in self.values.iter_mut() {
-                    println!("{}", el.abs());
-                    if el.abs() < 1e-10 {
-                        *el = 0.0;
-                    }
-                    else {
-                        *el = (*el as $t * 1e10).round()*1e-10;
-                    }   
-                }
-                self
-            }
+        impl LUDecomposition<$t> for Matrix<$t> {
             fn lu_permut(matrix_a : &mut Matrix<$t>, col: i32, num_piv : &mut usize) -> i32{
                 let mut ind_max=col;
                 for i in (col+1)..matrix_a.shape.0{
@@ -29,7 +28,7 @@ macro_rules! sub_impl {
                 ind_max
             }
 
-            pub fn lu_decomposition(&self) -> (Matrix<$t>,Matrix<$t>,Matrix<$t>,usize){
+            fn lu_decomposition(&self) -> (Matrix<$t>,Matrix<$t>,Matrix<$t>,usize){
                 if (self.shape.0 != self.shape.1) {
                     eprintln!("\nfn LU_lower_generator(permuted_matrix : &Matrix<$t>, col : i32) >>> The matrix is not square.");
                     std::process::exit(-1);
@@ -86,7 +85,7 @@ macro_rules! sub_impl {
                 x
             }
 
-            pub fn resolve_system(&self, vect_b : &Matrix<$t>) -> Matrix<$t> {
+            fn resolve_system(&self, vect_b : &Matrix<$t>) -> Matrix<$t> {
                 if  !(vect_b.is_col()) || (self.shape.1 != vect_b.shape.0) {
                     eprintln!("\nfn resolve_system(matrix_a : Matrix<$t>, vect_b : Matrix<$t>) >>> Shapes are incompatible to resolve a system.");
                     std::process::exit(-1);
@@ -94,7 +93,7 @@ macro_rules! sub_impl {
                 return self.resolve_tri_using_lu(vect_b, &self.lu_decomposition())
             }
 
-            pub fn invert(&self)  -> Matrix<$t> {
+            fn invert(&self)  -> Matrix<$t> {
                 let lu_decomp = &self.lu_decomposition();
 
                 let mut matrix_inv = Matrix::<$t>::fill(0,0, 0.0);
@@ -108,7 +107,7 @@ macro_rules! sub_impl {
                 matrix_inv
             }
 
-            pub fn det(&self) -> $t {
+            fn det(&self) -> $t {
                 if  (self.shape.1 != self.shape.0) {
                     eprintln!("\nfn det(&self) >>> Matrix is not square to compute the determinant.");
                     std::process::exit(-1);
@@ -126,19 +125,20 @@ macro_rules! sub_impl {
         }
 )*)
 }
-
 sub_impl! { f32 f64 }
 
 
 
 
+
+/*
 use num_rational::Ratio;
 
 
 /* SIGNED INTEGERS */
 macro_rules! sub_impl {
     ($($t:ty)*) => ($(
-        impl Matrix<$t> {
+        impl LUDecomposition<$t> for Matrix<$t> {
             fn lu_permut(matrix_a : &mut Matrix<Ratio<$t>>, col: i32, num_piv : &mut usize) -> i32{
                 let mut ind_max=col;
                 for i in (col+1)..matrix_a.shape.0{
@@ -149,7 +149,7 @@ macro_rules! sub_impl {
                 ind_max
             }
 
-            pub fn lu_decomposition(&self) -> (Matrix<Ratio<$t>>,Matrix<Ratio<$t>>,Matrix<Ratio<$t>>,usize){
+            fn lu_decomposition(&self) -> (Matrix<Ratio<$t>>,Matrix<Ratio<$t>>,Matrix<Ratio<$t>>,usize){
                 if (self.shape.0 != self.shape.1) {
                     eprintln!("\nfn LU_lower_generator(permuted_matrix : &Matrix<$t>, col : i32) >>> The matrix is not square.");
                     std::process::exit(-1);
@@ -207,7 +207,7 @@ macro_rules! sub_impl {
                 x
             }
 
-            pub fn resolve_system(&self, vect_b : &Matrix<$t>) -> Matrix<Ratio<$t>> {
+            fn resolve_system(&self, vect_b : &Matrix<$t>) -> Matrix<Ratio<$t>> {
                 if  !(vect_b.is_col()) || (self.shape.1 != vect_b.shape.0) {
                     eprintln!("\nfn resolve_system(matrix_a : Matrix<$t>, vect_b : Matrix<$t>) >>> Shapes are incompatible to resolve a system.");
                     std::process::exit(-1);
@@ -215,7 +215,7 @@ macro_rules! sub_impl {
                 return self.resolve_tri_using_lu(&vect_b.clone_to_ratio(), &self.lu_decomposition())
             }
 
-            pub fn invert(&self)  -> Matrix<Ratio<$t>> {
+            fn invert(&self)  -> Matrix<Ratio<$t>> {
                 let lu_decomp = &self.lu_decomposition();
 
                 let mut matrix_inv = Matrix::<Ratio<$t>>::fill(0,0, Ratio::new(0, 1));
@@ -231,7 +231,7 @@ macro_rules! sub_impl {
                 matrix_inv
             }
 
-            pub fn det(&self) -> Ratio<$t> {
+            fn det(&self) -> Ratio<$t> {
                 if  (self.shape.1 != self.shape.0) {
                     eprintln!("\nfn det(&self) >>> Matrix is not square to compute the determinant.");
                     std::process::exit(-1);
@@ -251,7 +251,7 @@ macro_rules! sub_impl {
 
 sub_impl! { i32 i64 }
 
-
+*/
 
 
 

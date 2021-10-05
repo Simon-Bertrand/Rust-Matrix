@@ -200,3 +200,22 @@ impl<T> Matrix<T> {
 
 
 
+macro_rules! sub_impl {
+    ($($t:ty)*) => ($(
+        impl Matrix<$t> {
+            pub fn round(mut self) -> Self{
+                for el in self.values.iter_mut() {
+                    println!("{}", el.abs());
+                    if el.abs() < 1e-10 {
+                        *el = 0.0;
+                    }
+                    else {
+                        *el = (*el as $t * 1e10).round()*1e-10;
+                    }   
+                }
+                self
+            }
+        }
+)*)
+}
+sub_impl! { f32 f64 }

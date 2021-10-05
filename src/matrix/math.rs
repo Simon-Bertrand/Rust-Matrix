@@ -3,6 +3,8 @@ use num_rational::Ratio;
 use crate::matrix::Matrix;
 use crate::matrix::constructors::Constructors;
 
+use crate::matrix::decomposition::LUDecomposition;
+
     
 
 
@@ -38,6 +40,8 @@ macro_rules! sub_impl {
 
 sub_impl! { f32 f64 }
 
+
+/*
 macro_rules! sub_impl {
     ($($t:ty)*) => ($(
         impl Matrix<$t> {
@@ -69,4 +73,5 @@ macro_rules! sub_impl {
 }
 
 sub_impl! { i32 i64 }
-    
+
+*/

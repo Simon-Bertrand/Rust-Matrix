@@ -1,5 +1,5 @@
 
-
+use num::Num;
 
 pub mod constructors;
 mod display;
