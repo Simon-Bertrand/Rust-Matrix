@@ -5,9 +5,10 @@
 
 
 include!("mod.rs");
-use crate::matrix::constructors::Constructors;
+
 
 fn main() {
 
-  let ma = genericnum::<i128> { v: 5};
+DataType::new();
+
 }
