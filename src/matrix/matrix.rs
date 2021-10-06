@@ -1,8 +1,8 @@
 use crate::matrix::*;
 
-use std::ops::Mul;
-use std::ops::Add;
-
+use num_rational::Ratio;
+use num_traits::Zero;
+use num_traits::NumOps;
 
 
 
@@ -104,9 +104,7 @@ impl<T: std::clone::Clone + Copy> Matrix<T> {
 }
 
 
-use num_traits::Zero;
-impl<T : Mul<Output = T> + Add<Output = T>+ std::fmt::Display + Copy + Zero> Matrix<T>{
-
+impl<T : Copy + Zero + NumOps> Matrix<T>{
     pub fn dot(&self, m: &Matrix<T>) -> Matrix<T> {
         if self.shape.1 != m.shape.0 {
             eprintln!("\nfn dot(&self, M: &Matrix) >>> The shapes are not compatible for matrix product.\n");
@@ -219,3 +217,19 @@ macro_rules! sub_impl {
 )*)
 }
 sub_impl! { f32 f64 }
+
+macro_rules! sub_impl {
+    ($($t:ty)*) => ($(
+        impl Matrix<$t>{
+            pub fn clone_to_ratio(&self) -> Matrix<Ratio<$t>>{
+                Matrix::<Ratio<$t>> {
+                    values:self.values.iter().map(|v : &$t| Ratio::from_integer(*v)).collect(),
+                    shape:self.shape,
+                }
+            }
+        }
+        
+    )*)
+}
+
+sub_impl! {i32 i64}

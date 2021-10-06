@@ -9,6 +9,5 @@ include!("mod.rs");
 
 fn main() {
 
-DataType::new();
 
 }
