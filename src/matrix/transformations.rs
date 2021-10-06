@@ -1,6 +1,5 @@
 use crate::matrix::*;
 
-use num_rational::Ratio;
 impl<T : Copy> Matrix<T> {
     pub fn swap(&mut self, i:i32, j:i32, axe:bool) -> &mut Matrix<T> {
         if axe {

@@ -5,7 +5,7 @@ use num_traits::Zero;
 use num_traits::NumOps;
 
 
-
+use crate::matrix::constructors::Constructors;
 
 
 impl<T> Matrix<T> {
@@ -15,7 +15,7 @@ impl<T> Matrix<T> {
             std::process::exit(-1);
         }
        else {
-            return self.values.iter().nth((i*self.shape.1 + j) as usize).expect("Indice not found")
+            return self.values.iter().nth((i*self.shape.1 + j) as usize).unwrap()
         }
     }
 
@@ -25,7 +25,7 @@ impl<T> Matrix<T> {
             std::process::exit(-1);
         }
        else {
-            return self.values.iter_mut().nth((i*self.shape.1 + j) as usize).expect("Indice not found")
+            return self.values.iter_mut().nth((i*self.shape.1 + j) as usize).unwrap()
         }
     }
 }
@@ -41,7 +41,7 @@ impl<T> Matrix<T> {
             std::process::exit(-1);
         }
        else {
-            return self.values.chunks(self.shape.0 as usize).nth(i as usize).expect("Indice not found")
+            return self.values.chunks(self.shape.0 as usize).nth(i as usize).unwrap()
         }
     }
 
@@ -51,7 +51,7 @@ impl<T> Matrix<T> {
             std::process::exit(-1);
         }
        else {
-            return self.values.chunks_mut(self.shape.0 as usize).nth(i as usize).expect("Indice not found")
+            return self.values.chunks_mut(self.shape.0 as usize).nth(i as usize).unwrap()
         }
     }
 
@@ -157,11 +157,83 @@ impl<T : Copy> Matrix<T> {
 }
 
 
-impl<T : std::cmp::PartialOrd<T>> Matrix<T> {
-    pub fn max(&self) -> &T {
-        let mut max = &self.values[0]; 
-        for el in self.values.iter()  {if max < el  { max = el;}}
-        max
+impl<T : std::cmp::PartialOrd<T> + Zero + Clone + Copy> Matrix<T> {
+    pub fn max(&self, axis : bool) -> Matrix<T> {
+        if self.is_col() || self.is_row() {
+            let mut max : Matrix<T> = Matrix::fill(1,1, Zero::zero());
+            let mut t_max : T = self.values[0];
+            for el in self.values.iter()  {if t_max < *el  {  t_max = *el;}}
+            max.values[0] = t_max;
+            max
+        }
+        else {
+            if axis {
+                let mut max : Matrix<T> = Matrix::fill(self.shape.0,1, Zero::zero());
+                for j in 0..self.shape.0 {
+                    let mut t_max : T = self.row_iter(j)[0].clone();
+                    for el in self.row_iter(j)  {if t_max < *el  {  t_max = el.clone();}}
+                    *max.get_mut(j,0) = t_max;
+                }
+                return max
+                
+            }
+            else {
+                let mut max : Matrix<T> = Matrix::fill(1,self.shape.1, Zero::zero());
+                for i in 0..self.shape.1 {
+                    let mut t_max : T = *self.col_iter(i).nth(0).unwrap();
+                    for el in self.col_iter(i)  {if t_max < *el  {  t_max = *el;}}
+                    *max.get_mut(0,i) = t_max;
+                }
+                return max
+            }
+        
+        }
+    }
+
+    pub fn max_all(&self) -> T {
+            let mut t_max : T = self.values[0];
+            for el in self.values.iter()  {if t_max < *el  {  t_max = *el;}}
+
+            t_max
+    }
+
+    pub fn min(&self, axis : bool) -> Matrix<T> {
+        if self.is_col() || self.is_row() {
+            let mut min : Matrix<T> = Matrix::fill(1,1, Zero::zero());
+            let mut t_min : T = self.values[0];
+            for el in self.values.iter()  {if t_min > *el  {  t_min = *el;}}
+            min.values[0] = t_min;
+            min
+        }
+        else {
+            if axis {
+                let mut min : Matrix<T> = Matrix::fill(self.shape.0,1, Zero::zero());
+                for j in 0..self.shape.0 {
+                    let mut t_min : T = self.row_iter(j)[0].clone();
+                    for el in self.row_iter(j)  {if t_min > *el  {  t_min = el.clone();}}
+                    *min.get_mut(j,0) = t_min;
+                }
+                return min
+                
+            }
+            else {
+                let mut min : Matrix<T> = Matrix::fill(1,self.shape.1, Zero::zero());
+                for i in 0..self.shape.1 {
+                    let mut t_min : T = *self.col_iter(i).nth(0).unwrap();
+                    for el in self.col_iter(i)  {if t_min > *el  {  t_min = *el;}}
+                    *min.get_mut(0,i) = t_min;
+                }
+                return min
+            }
+        
+        }
+    }
+
+    pub fn min_all(&self) -> T {
+            let mut t_min : T = self.values[0];
+            for el in self.values.iter()  {if t_min > *el  {  t_min = *el;}}
+
+            t_min
     }
 }
 

@@ -101,7 +101,7 @@ impl<T : Add + Copy> Add<&Matrix<T>> for &Matrix<T>
             values: {
                 let mut r: Vec<T::Output> = Vec::with_capacity(((&self).shape.0*(&self).shape.1) as usize); 
                 for (i,el) in (&self).values.iter().enumerate() {
-                    r.push(*el + *rhs.values.get(i).expect("Indice not found"));
+                    r.push(*el + *rhs.values.get(i).unwrap());
                 }
                 r},
             shape:self.shape}    
@@ -166,7 +166,7 @@ impl<T : Sub + Copy> Sub<&Matrix<T>> for &Matrix<T>
             values: {
                 let mut r: Vec<T::Output> = Vec::with_capacity(((&self).shape.0*(&self).shape.1) as usize); 
                 for (i,el) in (&self).values.iter().enumerate() {
-                    r.push(*el - *rhs.values.get(i).expect("Indice not found"));
+                    r.push(*el - *rhs.values.get(i).unwrap());
                 }
                 r},
             shape:self.shape}    

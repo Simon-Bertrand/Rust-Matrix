@@ -20,3 +20,21 @@ fn dot_product() {
     let id: Matrix<f64> =Matrix::fill_diagonal(3,1.0);
     assert_eq!(mat_a.dot(&mat_b), id, "Testing A*B = Id");
 }
+
+#[test]
+fn min_max() {
+
+    let mat_a: Matrix<i32> = Matrix::<i32> {values: vec![1, 2, 3, 4, 5, 6, 7, 8, 0], shape:(3,3)};
+    let max_ans1: Matrix<i32> = Matrix::<i32> {values: vec![3, 6, 8], shape:(3,1)};
+    let max_ans2: Matrix<i32> = Matrix::<i32> {values: vec![7, 8, 6], shape:(1,3)};
+
+    let min_ans1: Matrix<i32> = Matrix::<i32> {values: vec![1, 4, 0], shape:(3,1)};
+    let min_ans2: Matrix<i32> = Matrix::<i32> {values: vec![1, 2, 0], shape:(1,3)};
+
+    assert_eq!(mat_a.max(true), max_ans1, "Matrix rows max");
+    assert_eq!(mat_a.max(false), max_ans2, "Matrix columns max");
+    assert_eq!(mat_a.min(true), min_ans1, "Matrix rows min");
+    assert_eq!(mat_a.min(false), min_ans2, "Matrix columns min");
+    assert_eq!(mat_a.max(true).max(true).values[0], mat_a.max_all(), "Matrix all max");
+    assert_eq!(mat_a.min(true).min(true).values[0], mat_a.min_all(), "Matrix all min");
+}

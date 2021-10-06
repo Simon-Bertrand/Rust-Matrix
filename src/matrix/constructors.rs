@@ -4,6 +4,8 @@ use crate::matrix::*;
 use rand::Rng;
 use std::vec;
 use num_traits::Zero;
+use num_traits::FromPrimitive;
+
 trait Display {
     fn show(&self);
 }
@@ -44,23 +46,16 @@ impl<T : Clone + Copy + Zero> Matrix<T> {
     }
 }
 
-macro_rules! sub_impl {
-    ($($t:ty)*) => ($(
-        impl Matrix<$t> {
-            pub fn rand_binary(shape1 : i32, shape2: i32) -> Matrix<$t> {
-                let mut result = Matrix::fill(shape1,shape2,0 as $t);
-                let mut rng = rand::thread_rng();
-                for mut_el in result.values.iter_mut() {
-                    *mut_el = rng.gen_range(0..=1) as $t;
-                } result
-            }
-            
-        }
-    )*)
+impl<T : FromPrimitive + Zero + Clone + Copy> Matrix<T> {
+    pub fn rand_binary(shape1 : i32, shape2: i32) -> Matrix<T> {
+        let mut result  = Matrix::<T>::fill(shape1,shape2, Zero::zero());
+        let mut rng = rand::thread_rng();
+        for mut_el in result.values.iter_mut() {
+            *mut_el = FromPrimitive::from_i32(rng.gen_range(0..=1)).unwrap();
+        } result
+    }
+    
 }
-
-sub_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
-
 
 impl<T : std::str::FromStr > Matrix<T> {
     pub fn from_csv(path : &str) -> Matrix<T> {

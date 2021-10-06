@@ -1,5 +1,4 @@
 
-use num::Num;
 pub mod constructors;
 mod display;
 pub mod matrix;
