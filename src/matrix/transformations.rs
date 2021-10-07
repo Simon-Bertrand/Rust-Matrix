@@ -69,6 +69,20 @@ impl<T : Copy> Matrix<T> {
     }
     }
 }
+impl<T : std::fmt::Display + Copy> Matrix<T> {
+ 
+    pub fn transpose(&mut self) -> &Self {
+        for j in 0..self.shape.0 {
+            for (i,el) in self.col_iter_mut(j).enumerate() {
+                
+                self.values[(j* self.shape.0) as usize + i] = *el;
+            }
+        }
+ 
+        self.shape = (self.shape.1, self.shape.0);
+        self
+    }
+}
 
 
 

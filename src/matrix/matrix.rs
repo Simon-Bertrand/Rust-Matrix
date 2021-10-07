@@ -127,17 +127,10 @@ impl<T : Copy + Zero + NumOps> Matrix<T>{
 
 
 
-impl<T : Copy> Matrix<T> {
-    pub fn transpose(&self) -> Matrix<T> {
-        Matrix::<T> {
-            values:self.values.clone(),
-            shape: (self.shape.1, self.shape.0)
-        }
-    }
-
+impl<T : Clone> Matrix<T> {
     pub fn flatten(&self) -> Matrix<T> {
         Matrix::<T> {
-            values:(*self.values).to_vec(),
+            values:self.values.clone(),
             shape: (1, self.shape.1*self.shape.0)
         }
     }
