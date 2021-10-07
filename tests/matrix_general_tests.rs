@@ -35,6 +35,20 @@ fn min_max() {
     assert_eq!(mat_a.max(false), max_ans2, "Matrix columns max");
     assert_eq!(mat_a.min(true), min_ans1, "Matrix rows min");
     assert_eq!(mat_a.min(false), min_ans2, "Matrix columns min");
-    assert_eq!(mat_a.max(true).max(true).values[0], mat_a.max_all(), "Matrix all max");
-    assert_eq!(mat_a.min(true).min(true).values[0], mat_a.min_all(), "Matrix all min");
+    assert_eq!(mat_a.max(true).max(true).values[0], *mat_a.max_all(), "Matrix all max");
+    assert_eq!(mat_a.min(true).min(true).values[0], *mat_a.min_all(), "Matrix all min");
+}
+
+#[test]
+fn sum_norm_mean() {
+    let mat_a: Matrix<i32> = Matrix::<i32> {values: vec![1, 5, 3, 4, 5, 6, 7, 8, 0], shape:(3,3)};
+
+    let ans1: Matrix<i32> = Matrix::<i32> {values: vec![9], shape:(1,1)};
+    let ans2: Matrix<i32> = Matrix::<i32> {values: vec![35], shape:(1,1)};
+    let ans3: Matrix<i32> = Matrix::<i32> {values: vec![149], shape:(1,1)};
+
+    assert_eq!(mat_a.sum(true).min(true), ans1, "Matrix h-sum h-min");
+    assert_eq!(mat_a.norm(true).min(true), ans2, "Matrix h-norm h-min");
+    assert_eq!(mat_a.max(false).norm(true), ans3, "Matrix v-max h-norm");
+
 }
