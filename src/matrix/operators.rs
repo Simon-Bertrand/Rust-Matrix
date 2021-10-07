@@ -4,7 +4,7 @@ use std::ops::Sub;
 use std::ops::Div;
 use std::cmp::PartialEq;
 use num_rational::Ratio;
-use num::Num;
+use num_traits::Num;
 use crate::matrix::*;
 use crate::matrix::constructors::Constructors;
 
@@ -46,7 +46,7 @@ impl<T : num_integer::Integer + Clone> PartialEq<Matrix<T>> for Matrix<Ratio<T>>
         }
     }
 }
-impl<T : num_integer::Integer + Clone> PartialEq<Matrix<Ratio<T>>> for Matrix<T> {fn eq(&self, other: &Matrix<Ratio<T>>) -> bool {self == other}}
+impl<T : Clone> PartialEq<Matrix<Ratio<T>>> for Matrix<T> {fn eq(&self, other: &Matrix<Ratio<T>>) -> bool {self == other}}
 
 
 impl<T : Mul + Copy> Mul<T> for &Matrix<T>

@@ -1,8 +1,8 @@
 use crate::matrix::*;
 use crate::matrix::constructors::Constructors;
 use num_traits::NumOps;
-use num::Zero;
-use num::One;
+use num_traits::Zero;
+use num_traits::One;
 
 use num_rational::Ratio;
 

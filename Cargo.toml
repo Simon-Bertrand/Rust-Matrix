@@ -3,13 +3,9 @@ name = "numru"
 version = "0.1.0"
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 rand = "0.8.4"
 num-traits = "0.2.14"
 num-rational ="0.4"
 num-integer ="0.1.44"
-num ="0.4"
 csv = "1.1"
-

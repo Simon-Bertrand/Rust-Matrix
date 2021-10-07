@@ -2,7 +2,8 @@ use crate::matrix::*;
 use num_rational::Ratio;
 use num_traits::Zero;
 use num_traits::NumOps;
-use std::cmp::Ord;
+
+
 use crate::matrix::constructors::Constructors;
 
 
@@ -13,7 +14,7 @@ impl<T> Matrix<T> {
             std::process::exit(-1);
         }
        else {
-            return self.values.iter().nth(i*self.shape.1 + j).unwrap()
+            return self.values.get(i*self.shape.1 + j).unwrap()
         }
     }
 
@@ -23,22 +24,84 @@ impl<T> Matrix<T> {
             std::process::exit(-1);
         }
        else {
-            return self.values.iter_mut().nth(i*self.shape.1 + j).unwrap()
+            return self.values.get_mut(i*self.shape.1 + j).unwrap()
         }
     }
 }
 
-impl<T> Matrix<T> {
-    pub fn row_iter(&self, i:usize) -> &[T] {
+
+pub struct MatrixIter<'a, T> {
+    data: &'a Matrix<T>,
+    ind_axe : usize,
+    index : usize,
+    axe : bool
+}
+
+impl<'a, T> Iterator for MatrixIter<'a, T>{ 
+    type Item = &'a T;
+    fn next(&mut self) ->Option<Self::Item> {
+     while self.index < {if self.axe {self.data.shape.1} else {self.data.shape.0}} {
+        self.index += 1;
+        return Some(&self.data.values[{if self.axe {self.ind_axe*self.data.shape.1 + self.index-1} else {(self.index-1)*self.data.shape.1 + self.ind_axe}}])
+     }
+     None
+    }
+}
+
+/*
+pub struct MatrixIterMut<'a, T> {
+    data: &'a mut Matrix<T>,
+    ind_axe0 : usize,
+    ind_axe1 : usize,
+    axe : bool
+}
+
+impl<'a, T> Iterator for MatrixIterMut<'a, T>{ 
+    type Item = &'a mut T;
+    fn next(& mut self) ->Option<Self::Item> {
+    if self.axe {
+        while self.ind_axe1 < self.data.shape.1{
+            self.ind_axe1 += 1;
+            return Some(self.data.values.iter_mut().nth(0).unwrap())
+         }
+         None
+    }
+    else {
+        while self.ind_axe0 < self.data.shape.0{
+            self.ind_axe0 += 1;
+            return Some(self.data.get_mut(self.ind_axe0,self.ind_axe1))
+         }
+         None
+    }
+     
+    }
+}
+*/
+impl<'a,T> Matrix<T> {
+    pub fn col_iter(&'a self, i : usize) -> MatrixIter<'a, T> {
+        if  i>= self.shape.1 {
+            eprintln!("\nfn col_iter(&self, j:usize) >>> The col indice is out of range : {} is not in [{}-{}]. \n", i, 0, self.shape.1-1);
+            std::process::exit(-1);
+        }
+        else {
+            MatrixIter::<'a, T> { data: &self, ind_axe : i, index : 0, axe : false}
+        }
+    }
+
+    pub fn row_iter(&'a self, i : usize) -> MatrixIter<'a, T> {
         if i>= self.shape.0 {
             eprintln!("\nfn row_iter(&self, i:usize) >>> The row indice is out of range : {} is not in [{}-{}]. \n", i, 0, self.shape.0-1);
             std::process::exit(-1);
         }
-       else {
-            return self.values.chunks(self.shape.0).nth(i).unwrap()
+        else {
+            MatrixIter::<'a, T> { data: &self, ind_axe : i, index : 0, axe : true}
         }
     }
+}
 
+
+
+impl<T> Matrix<T> {
     pub fn row_iter_mut(&mut self, i:usize) ->  &mut [T]  {
         if  i>= self.shape.0 {
             eprintln!("\nfn row_iter_mut(&mut self, i:usize) >>> The row indice is out of range : {} is not in [{}-{}]. \n", i, 0, self.shape.0-1);
@@ -48,16 +111,6 @@ impl<T> Matrix<T> {
             return self.values.chunks_mut(self.shape.0).nth(i).unwrap()
         }
     }
-
-    pub fn col_iter(&self, j:usize) -> std::iter::StepBy<std::slice::Iter<'_, T>>{
-        if  j>= self.shape.1 {
-            eprintln!("\nfn col_iter(&self, j:usize) >>> The col indice is out of range : {} is not in [{}-{}]. \n", j, 0, self.shape.1-1);
-            std::process::exit(-1);
-        }
-       else {
-            return self.values[j..].iter().step_by(self.shape.0)
-        }
-    }       
 
     pub fn col_iter_mut(&mut self, j:usize) ->  std::iter::StepBy<std::slice::IterMut<'_, T>>  {
         if j>= self.shape.1 {
@@ -131,15 +184,28 @@ impl<T : Copy + Zero + NumOps> Matrix<T>{
 
 
 
-fn core_min_max<T : std::cmp::Ord + PartialOrd + Zero + Clone + Copy>(this : &Matrix<T>, axis : bool, is_max : bool) -> Matrix<T>{
+
+fn core_min_max_all<T : PartialOrd>(this : &Matrix<T>, is_max : bool) -> &T {
+    let mut lhs : &T = &this.values[0];
+    for rhs in this.values.iter() {
+        if is_max {if lhs < rhs  { lhs = rhs;}} else {if lhs > rhs  { lhs = rhs;}}
+    }
+    lhs
+}
+
+fn core_min_max<T : PartialOrd + Zero + Clone + Copy>(this : &Matrix<T>, axis : bool, is_max : bool) -> Matrix<T>{
     if this.is_col() || this.is_row() {
-        Matrix::<T> {
-            values: vec![{if is_max{*this.values.iter().max().unwrap()} else {*this.values.iter().min().unwrap()}}],
+        return Matrix::<T> {
+            values: vec![{
+                let mut lhs : T = this.values[0];
+                for rhs in this.values.iter() {if is_max {if lhs < *rhs  { lhs = *rhs;}} else {if lhs > *rhs  { lhs = *rhs;}}}
+                lhs
+            }],
             shape : (1,1)
         }
     }
     else {
-        if axis {
+        if axis { 
             let mut result : Matrix<T> = Matrix::fill(this.shape.0,1, Zero::zero());
             for j in 0..this.shape.0 {
                 let mut lhs : T = *this.get(j,0);
@@ -160,20 +226,36 @@ fn core_min_max<T : std::cmp::Ord + PartialOrd + Zero + Clone + Copy>(this : &Ma
         }}
 }
 
-impl<T : Ord +  std::cmp::PartialOrd<T> + Zero + Clone + Copy> Matrix<T> {
+impl<T : PartialOrd + Zero + Clone + Copy> Matrix<T> {
     pub fn max(&self, axis : bool) -> Matrix<T> {
         core_min_max(self, axis, true)
     }
     pub fn min(&self, axis : bool) -> Matrix<T> {
         core_min_max(self, axis, false)
     }
+
+}
+
+impl<T : Ord + Zero> Matrix<T> {
     pub fn max_all(&self) -> &T {
-        self.values.iter().max().unwrap()
+        core_min_max_all(self, true)
     }
     pub fn min_all(&self) -> &T {
-        self.values.iter().min().unwrap()
+        core_min_max_all(self, false)
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
 impl<T : std::cmp::PartialOrd<T> + Zero + Clone + Copy> Matrix<T> {
     pub fn sum_all(&self) -> T {
         let mut t_s : T =Zero::zero();

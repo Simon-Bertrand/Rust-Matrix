@@ -23,7 +23,11 @@ fn print_type_of<T>(_: &T) {
 
 impl<T : std::fmt::Display + std::cmp::PartialOrd> std::fmt::Display for Matrix<T> {
     fn fmt(&self, _f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        let spaces = count_digits(&self);
+        if self.shape.0 == 1 && self.shape.1 == 1 {
+            Ok(print!("\n {} \n", self.values[0]))
+        }
+        else {            
+            let spaces = count_digits(&self);
             let mut i=0; 
             println!("");
             for val in self.values.iter() {      
@@ -47,7 +51,7 @@ impl<T : std::fmt::Display + std::cmp::PartialOrd> std::fmt::Display for Matrix<
             Ok({
                 print_type_of(self.values.iter().nth(0).expect("Empty values."));
                 println!("({},{}) -", self.shape.0, self.shape.1)}
-            )
+            )}
     }
 }
 
