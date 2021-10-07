@@ -21,11 +21,11 @@ fn core_reglin_normal<T : FromPrimitive + NumOps + Into<T> + Clone + Copy + Zero
             *result.get_mut(0,0) = *result.get_mut(0,0) +  *this.get(i,0) * *this.get(i,0);
             *result.get_mut(0,1) = *result.get_mut(0,1) +  *this.get(i,0);
             *result.get_mut(1,0) = *result.get(0,1);
-            *b.get_mut(0,0) = *b.get_mut(0,0) +  *this.get(i,0) * *this.get(i as i32,1);
-            *b.get_mut(1,0) = *b.get_mut(1,0)  + *this.get(i as i32,1);
+            *b.get_mut(0,0) = *b.get_mut(0,0) +  *this.get(i,0) * *this.get(i,1);
+            *b.get_mut(1,0) = *b.get_mut(1,0)  + *this.get(i,1);
 
         }
-        *result.get_mut(1,1) = FromPrimitive::from_i32(this.shape.0).unwrap();
+        *result.get_mut(1,1) = FromPrimitive::from_usize(this.shape.0).unwrap();
 
         (result,b)
         

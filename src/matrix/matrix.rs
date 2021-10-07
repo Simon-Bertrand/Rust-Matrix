@@ -7,65 +7,65 @@ use crate::matrix::constructors::Constructors;
 
 
 impl<T> Matrix<T> {
-    pub fn get(&self, i:i32, j:i32) -> &T {
-        if i<0 || i>= self.shape.0 {
-            eprintln!("\nfn get_mut(&mut self, i:i32, j:i32) >>> The indice is out of range : {} is not in [{}-{}] or {} is not in [{}-{}] . \n", i, 0, self.shape.0-1, j, 0, self.shape.1-1);
+    pub fn get(&self, i:usize, j:usize) -> &T {
+        if i>= self.shape.0 {
+            eprintln!("\nfn get_mut(&mut self, i:usize, j:usize) >>> The indice is out of range : {} is not in [{}-{}] or {} is not in [{}-{}] . \n", i, 0, self.shape.0-1, j, 0, self.shape.1-1);
             std::process::exit(-1);
         }
        else {
-            return self.values.iter().nth((i*self.shape.1 + j) as usize).unwrap()
+            return self.values.iter().nth(i*self.shape.1 + j).unwrap()
         }
     }
 
-    pub fn get_mut(&mut self, i:i32, j:i32) ->  &mut T  {
-        if (i<0 || i>= self.shape.0)||((j<0 || j>= self.shape.1)) {
-            eprintln!("\nfn get_mut(&mut self, i:i32, j:i32) >>> The indice is out of range : {} is not in [{}-{}] or {} is not in [{}-{}] . \n", i, 0, self.shape.0-1, j, 0, self.shape.1-1);
+    pub fn get_mut(&mut self, i:usize, j:usize) ->  &mut T  {
+        if i>= self.shape.0 || j>= self.shape.1 {
+            eprintln!("\nfn get_mut(&mut self, i:usize, j:usize) >>> The indice is out of range : {} is not in [{}-{}] or {} is not in [{}-{}] . \n", i, 0, self.shape.0-1, j, 0, self.shape.1-1);
             std::process::exit(-1);
         }
        else {
-            return self.values.iter_mut().nth((i*self.shape.1 + j) as usize).unwrap()
+            return self.values.iter_mut().nth(i*self.shape.1 + j).unwrap()
         }
     }
 }
 
 impl<T> Matrix<T> {
-    pub fn row_iter(&self, i:i32) -> &[T] {
-        if i<0 || i>= self.shape.0 {
-            eprintln!("\nfn row_iter(&self, i:i32) >>> The row indice is out of range : {} is not in [{}-{}]. \n", i, 0, self.shape.0-1);
+    pub fn row_iter(&self, i:usize) -> &[T] {
+        if i>= self.shape.0 {
+            eprintln!("\nfn row_iter(&self, i:usize) >>> The row indice is out of range : {} is not in [{}-{}]. \n", i, 0, self.shape.0-1);
             std::process::exit(-1);
         }
        else {
-            return self.values.chunks(self.shape.0 as usize).nth(i as usize).unwrap()
+            return self.values.chunks(self.shape.0).nth(i).unwrap()
         }
     }
 
-    pub fn row_iter_mut(&mut self, i:i32) ->  &mut [T]  {
-        if i<0 || i>= self.shape.0 {
-            eprintln!("\nfn row_iter_mut(&mut self, i:i32) >>> The row indice is out of range : {} is not in [{}-{}]. \n", i, 0, self.shape.0-1);
+    pub fn row_iter_mut(&mut self, i:usize) ->  &mut [T]  {
+        if  i>= self.shape.0 {
+            eprintln!("\nfn row_iter_mut(&mut self, i:usize) >>> The row indice is out of range : {} is not in [{}-{}]. \n", i, 0, self.shape.0-1);
             std::process::exit(-1);
         }
        else {
-            return self.values.chunks_mut(self.shape.0 as usize).nth(i as usize).unwrap()
+            return self.values.chunks_mut(self.shape.0).nth(i).unwrap()
         }
     }
 
-    pub fn col_iter(&self, j:i32) -> std::iter::StepBy<std::slice::Iter<'_, T>>{
-        if j<0 || j>= self.shape.1 {
-            eprintln!("\nfn col_iter(&self, j:i32) >>> The col indice is out of range : {} is not in [{}-{}]. \n", j, 0, self.shape.1-1);
+    pub fn col_iter(&self, j:usize) -> std::iter::StepBy<std::slice::Iter<'_, T>>{
+        if  j>= self.shape.1 {
+            eprintln!("\nfn col_iter(&self, j:usize) >>> The col indice is out of range : {} is not in [{}-{}]. \n", j, 0, self.shape.1-1);
             std::process::exit(-1);
         }
        else {
-            return self.values[j as usize..].iter().step_by(self.shape.0 as usize)
+            return self.values[j..].iter().step_by(self.shape.0)
         }
     }       
 
-    pub fn col_iter_mut(&mut self, j:i32) ->  std::iter::StepBy<std::slice::IterMut<'_, T>>  {
-        if j<0 || j>= self.shape.1 {
-            eprintln!("\nfn col_iter(&self, j:i32) >>> The col indice is out of range : {} is not in [{}-{}]. \n", j, 0, self.shape.1-1);
+    pub fn col_iter_mut(&mut self, j:usize) ->  std::iter::StepBy<std::slice::IterMut<'_, T>>  {
+        if j>= self.shape.1 {
+            eprintln!("\nfn col_iter(&self, j:usize) >>> The col indice is out of range : {} is not in [{}-{}]. \n", j, 0, self.shape.1-1);
             std::process::exit(-1);
         }
        else {
-            return self.values[j as usize..].iter_mut().step_by(self.shape.0 as usize)
+            return self.values[j..].iter_mut().step_by(self.shape.0)
         }
     }
 }
@@ -73,28 +73,34 @@ impl<T> Matrix<T> {
 
 impl<T: std::clone::Clone + Copy> Matrix<T> {
 
-    pub fn row(&self, i:i32) -> Matrix<T> {
-        if i<0 || i>= self.shape.0 {
-            eprintln!("\nfn row(&self, i:i32) >>> The row indice is out of range : {} is not in [{}-{}]. \n", i, 0, self.shape.0-1);
+    pub fn row(&self, i:usize) -> Matrix<T> {
+        if  i>= self.shape.0 {
+            eprintln!("\nfn row(&self, i:usize) >>> The row indice is out of range : {} is not in [{}-{}]. \n", i, 0, self.shape.0-1);
             std::process::exit(-1);
         }
        else {
-            Matrix::<T> {values:(self.values[((i*self.shape.1) as usize)..((i*self.shape.1 + self.shape.0) as usize)]).to_vec(), shape:(1,self.shape.1)}
+            Matrix::<T> {values:(self.values[(i*self.shape.1)..(i*self.shape.1 + self.shape.0)]).to_vec(), shape:(1,self.shape.1)}
         }
     }
     
-    pub fn col(&self, j:i32) -> Matrix<T> {
-        if j<0 || j>= self.shape.1 {
-            eprintln!("\nfn col(&self, i:i32) >>> The col indice is out of range : {} is not in [{}-{}]. \n", j, 0, self.shape.0-1);
+    pub fn col(&self, j:usize) -> Matrix<T> {
+        if j>= self.shape.1 {
+            eprintln!("\nfn col(&self, i:usize) >>> The col indice is out of range : {} is not in [{}-{}]. \n", j, 0, self.shape.0-1);
             std::process::exit(-1);
         }
         else {
-            Matrix::<T> {values:{let mut r : Vec<T> = Vec::with_capacity(self.shape.0 as usize); for col_el in self.col_iter(j) { r.push(*col_el)} r}, shape:(1,self.shape.1)}
+            Matrix::<T> {values:{let mut r : Vec<T> = Vec::with_capacity(self.shape.0); for col_el in self.col_iter(j) { r.push(*col_el)} r}, shape:(1,self.shape.1)}
         }
     }
     
 }
 
+
+impl<T : std::convert::AsMut<Matrix<T>>> AsMut<Matrix<T>> for Matrix<T> {
+    fn as_mut(&mut self) -> &mut Matrix<T> {
+        self
+    }
+}
 impl<T : Copy + Zero + NumOps> Matrix<T>{
     pub fn dot(&self, m: &Matrix<T>) -> Matrix<T> {
         if self.shape.1 != m.shape.0 {
@@ -103,13 +109,13 @@ impl<T : Copy + Zero + NumOps> Matrix<T>{
         }
         Matrix::<T> {
             values:{
-                let mut r:Vec<T>= Vec::with_capacity((self.shape.1*m.shape.0) as usize); 
+                let mut r:Vec<T>= Vec::with_capacity(self.shape.1*m.shape.0); 
                 for i in 0..self.shape.0 {
                     for j in 0..m.shape.1 {
                         r.push({
                             let mut sum : T = Zero::zero();
-                                for k in 0..(m.shape.0 as usize) {
-                                    sum = sum + *self.get(i,k as i32)* *m.get(k as i32,j);
+                                for k in 0..m.shape.0 {
+                                    sum = sum + *self.get(i,k)* *m.get(k,j);
                                 } 
                                 sum
                         })
@@ -122,22 +128,6 @@ impl<T : Copy + Zero + NumOps> Matrix<T>{
  
     }
 }
-
-
-
-
-
-impl<T : Clone> Matrix<T> {
-    pub fn flatten(&self) -> Matrix<T> {
-        Matrix::<T> {
-            values:self.values.clone(),
-            shape: (1, self.shape.1*self.shape.0)
-        }
-    }
-
-}
-
-
 
 
 
@@ -192,8 +182,6 @@ impl<T : std::cmp::PartialOrd<T> + Zero + Clone + Copy> Matrix<T> {
     }
 }
 
-
-
 fn core_sum_mean_norm<T : std::iter::Sum + NumOps + Zero + Copy>(this : &Matrix<T>, axis:bool, reduct : &T , squared : bool) -> Matrix<T> {
     if this.is_col() || this.is_row() {
         Matrix::<T> {
@@ -210,7 +198,7 @@ fn core_sum_mean_norm<T : std::iter::Sum + NumOps + Zero + Copy>(this : &Matrix<
     else {
         if axis {
             return Matrix::<T> {values: {
-                let mut r : Vec<T> = Vec::with_capacity(this.shape.0 as usize);
+                let mut r : Vec<T> = Vec::with_capacity(this.shape.0);
                 for i in 0..this.shape.0 {
                     let mut t_s : T  = Zero::zero(); 
                     for el in this.row_iter(i)  {t_s = t_s + {if squared {*el**el} else {*el}};}
@@ -220,7 +208,7 @@ fn core_sum_mean_norm<T : std::iter::Sum + NumOps + Zero + Copy>(this : &Matrix<
         }
         else {
             return Matrix::<T> {values: {
-                let mut r : Vec<T> = Vec::with_capacity(this.shape.0 as usize);
+                let mut r : Vec<T> = Vec::with_capacity(this.shape.0);
                 for j in 0..this.shape.1 {
                     let mut t_s :T  = Zero::zero();
                     for el in this.col_iter(j)  {t_s = t_s + {if squared {*el**el} else {*el}};}
@@ -230,7 +218,6 @@ fn core_sum_mean_norm<T : std::iter::Sum + NumOps + Zero + Copy>(this : &Matrix<
         }
     }
 }
-
 
 macro_rules! sub_impl {
     ($($t:ty)*) => ($(
@@ -249,12 +236,11 @@ macro_rules! sub_impl {
 }
 sub_impl! { f32 f64 }
 
-
 macro_rules! sub_impl {
     ($($t:ty)*) => ($(
         impl Matrix<$t> {
             pub fn mean(&self, axis : bool) -> Matrix<Ratio<$t>> {
-                core_sum_mean_norm(&self.clone_to_ratio(), axis, &{if axis {Ratio::new(self.shape.1.into(),1)} else {Ratio::new(self.shape.0.into(),1)}} , false)
+                core_sum_mean_norm(&self.clone_to_ratio(), axis, &{if axis {Ratio::new((self.shape.1 as i32).into(),1)} else {Ratio::new((self.shape.0 as i32).into(),1)}} , false)
             }
             pub fn norm(&self, axis : bool) -> Matrix<$t> {
                 core_sum_mean_norm(self, axis, &1 , true)
@@ -271,7 +257,7 @@ macro_rules! sub_impl {
     ($($t:ty)*) => ($(
         impl Matrix<$t> {
             pub fn mean(&self, axis : bool) -> Matrix<$t> {
-                core_sum_mean_norm(&self, axis, &{if axis {Ratio::new(self.shape.1.into(),1)} else {Ratio::new(1,self.shape.0.into())}} , false)
+                core_sum_mean_norm(&self, axis, &{if axis {Ratio::new((self.shape.1 as i32).into(),1)} else {Ratio::new(1,(self.shape.0 as i32).into())}} , false)
             }
             pub fn norm(&self, axis : bool) -> Matrix<$t> {
                 core_sum_mean_norm(self, axis, &Ratio::new(1,1) , true)
@@ -285,15 +271,11 @@ macro_rules! sub_impl {
 sub_impl! { Ratio<i32> Ratio<i64> }
 
 
-
-
 impl<T : Copy> Matrix<T> {
     pub fn copy(&self) -> Matrix<T> {
         Matrix::<T> {values:self.values.clone(),shape:self.shape.clone()}
     }
-
 }
-
 
 
 impl<T> Matrix<T> {
@@ -314,9 +296,6 @@ impl<T> Matrix<T> {
         }
     }
 }
-
-
-
 
 macro_rules! sub_impl {
     ($($t:ty)*) => ($(

@@ -1,7 +1,6 @@
 use numru;
 use crate::numru::matrix::Matrix;
 
-use num_rational::Rational32;
 
 #[test]
 fn concatenation_both_axes() {
@@ -19,6 +18,15 @@ fn dot_product() {
     let mat_b: Matrix<f64> = Matrix::<f64> {values: vec![1.0/3.0, -2.0/3.0, 2.0/3.0, 2.0/3.0, 2.0/3.0, 1.0/3.0, -2.0/3.0, 1.0/3.0, 2.0/3.0], shape:(3,3)};
     let id: Matrix<f64> =Matrix::fill_diagonal(3,1.0);
     assert_eq!(mat_a.dot(&mat_b), id, "Testing A*B = Id");
+}
+
+#[test]
+fn transpose() {
+    let mut mat_a: Matrix<i32> = Matrix::<i32> {values: vec![1, 2, 3, 4, 5, 6, 7, 8], shape:(2,4)};
+    let mat_a_original_copy= Matrix::<i32> {values: vec![1, 2, 3, 4, 5, 6, 7, 8], shape:(2,4)};
+    let ans: Matrix<i32> = Matrix::<i32> {values: vec![1, 5, 2, 6, 3, 7, 4, 8], shape:(4,2)};
+    assert_eq!(mat_a.transpose(), &ans, "Transposing");
+    assert_eq!(mat_a.transpose(), &mat_a_original_copy, "Double Transpose composition is equal to identity");
 }
 
 #[test]

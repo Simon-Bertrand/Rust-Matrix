@@ -76,10 +76,10 @@ sub_impl! { Ratio<i32> Ratio<i64>}
 
 
 
-fn core_lu_permut<T : NumOps + Copy + PartialOrd>(matrix_a : &mut Matrix<T>, col: i32, num_piv : &mut usize, negative_identity : T) -> i32{
+fn core_lu_permut<T : NumOps + Copy + PartialOrd>(matrix_a : &mut Matrix<T>, col: usize, num_piv : &mut usize, negative_identity : T) -> usize{
     let mut ind_max=col;
     for i in (col+1)..matrix_a.shape.0{
-        if *matrix_a.get(ind_max,col) < *matrix_a.get(i as i32,col) && matrix_a.get(ind_max,col) > &(negative_identity * *matrix_a.get(i as i32,col)) {ind_max = i as i32;}
+        if *matrix_a.get(ind_max,col) < *matrix_a.get(i,col) && matrix_a.get(ind_max,col) > &(negative_identity * *matrix_a.get(i,col)) {ind_max = i;}
     }
     if ind_max!=col {*num_piv+=1}
     matrix_a.swap(col, ind_max, true);
@@ -130,19 +130,21 @@ fn core_resolve_tri_using_lu<T : NumOps + Copy + Zero + One>(this : &Matrix<T>, 
     let b = matrix_p.dot(&vect_b);
     for ind_row in 0..y.shape.0 {
         *y.get_mut(ind_row,0)={                    
-            let mut sum : T = *b.get(ind_row as i32,0);
-            for k in 0..=(ind_row-1) {
-                sum = sum - *matrix_l.get(ind_row as i32,k as i32)* *(y.get(k,0));
-            }sum}/ *matrix_l.get(ind_row as i32,ind_row as i32);
+            let mut sum : T = *b.get(ind_row,0);
+
+            for k in 0..=({if ind_row != 0{ind_row-1} else {0}}){
+                
+                sum = sum - *matrix_l.get(ind_row,k)* *(y.get(k,0));
+            }sum}/ *matrix_l.get(ind_row,ind_row);
     }
 
     let mut x = Matrix::<T>::fill(this.shape.0, 1, Zero::zero());
     for ind_row in (0..x.shape.0).rev() {
     *x.get_mut(ind_row,0) = {
-        let mut sum : T = *y.get(ind_row as i32,0);
+        let mut sum : T = *y.get(ind_row,0);
         for k in (ind_row +1)..x.shape.0  {
-            sum = sum - *matrix_u.get(ind_row,k as i32)* *(x.get(k,0));
-        }sum}/ *matrix_u.get(ind_row as i32, ind_row as i32);
+            sum = sum - *matrix_u.get(ind_row,k)* *(x.get(k,0));
+        }sum}/ *matrix_u.get(ind_row, ind_row);
     }
     x
 }

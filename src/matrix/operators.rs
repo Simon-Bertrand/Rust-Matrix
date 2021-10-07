@@ -55,7 +55,7 @@ impl<T : Mul + Copy> Mul<T> for &Matrix<T>
     fn mul(self, rhs: T) -> Matrix<T::Output> {
         Matrix::<T::Output>{ 
             values: {
-                let mut r: Vec<T::Output> = Vec::with_capacity(((&self).shape.0*(&self).shape.1) as usize); 
+                let mut r: Vec<T::Output> = Vec::with_capacity(&self.shape.0*(&self).shape.1); 
                 for el in (&self).values.iter() {
                     r.push(*el * rhs)
                 }
@@ -99,7 +99,7 @@ impl<T : Add + Copy> Add<&Matrix<T>> for &Matrix<T>
     fn add(self, rhs: &Matrix<T>) -> Matrix<T::Output> {
         Matrix::<T::Output>{ 
             values: {
-                let mut r: Vec<T::Output> = Vec::with_capacity(((&self).shape.0*(&self).shape.1) as usize); 
+                let mut r: Vec<T::Output> = Vec::with_capacity((&self).shape.0*(&self).shape.1); 
                 for (i,el) in (&self).values.iter().enumerate() {
                     r.push(*el + *rhs.values.get(i).unwrap());
                 }
@@ -119,7 +119,7 @@ impl<T : Add + Copy> Add<T> for &Matrix<T>
     fn add(self, rhs: T) -> Matrix<T::Output> {
         Matrix::<T::Output>{ 
             values: {
-                let mut r: Vec<T::Output> = Vec::with_capacity(((&self).shape.0*(&self).shape.1) as usize); 
+                let mut r: Vec<T::Output> = Vec::with_capacity((&self).shape.0*(&self).shape.1); 
                 for el in (&self).values.iter() {
                     r.push(*el + rhs)
                 }
@@ -164,7 +164,7 @@ impl<T : Sub + Copy> Sub<&Matrix<T>> for &Matrix<T>
     fn sub(self, rhs: &Matrix<T>) -> Matrix<T::Output> {
         Matrix::<T::Output>{ 
             values: {
-                let mut r: Vec<T::Output> = Vec::with_capacity(((&self).shape.0*(&self).shape.1) as usize); 
+                let mut r: Vec<T::Output> = Vec::with_capacity((&self).shape.0*(&self).shape.1); 
                 for (i,el) in (&self).values.iter().enumerate() {
                     r.push(*el - *rhs.values.get(i).unwrap());
                 }
@@ -183,7 +183,7 @@ impl<T : Sub + Copy> Sub<T> for &Matrix<T>
     fn sub(self, rhs: T) -> Matrix<T::Output> {
         Matrix::<T::Output>{ 
             values: {
-                let mut r: Vec<T::Output> = Vec::with_capacity(((&self).shape.0*(&self).shape.1) as usize); 
+                let mut r: Vec<T::Output> = Vec::with_capacity((&self).shape.0*(&self).shape.1); 
                 for el in (&self).values.iter() {
                     r.push(*el - rhs)
                 }
@@ -231,7 +231,7 @@ impl<T : Div + Copy> Div<&Matrix<T>> for &Matrix<T> {
             // Need zero division check       
             Matrix::<T::Output>{ 
                 values: {
-                    let mut r: Vec<T::Output> = Vec::with_capacity(((&rhs).shape.0*(*rhs).shape.1) as usize); 
+                    let mut r: Vec<T::Output> = Vec::with_capacity((&rhs).shape.0*(*rhs).shape.1); 
                     for (i,el) in (&rhs).values.iter().enumerate() {
                         r.push(*(&self).values.get(i).expect("Indice not found.") / *el)
                     }
@@ -253,7 +253,7 @@ impl<T : Div + Copy> Div<T> for &Matrix<T>
     fn div(self, rhs: T) -> Matrix<T::Output> {
         Matrix::<T::Output>{ 
             values: {
-                let mut r: Vec<T::Output> = Vec::with_capacity(((&self).shape.0*(&self).shape.1) as usize); 
+                let mut r: Vec<T::Output> = Vec::with_capacity((&self).shape.0*(&self).shape.1); 
                 for el in (&self).values.iter() {
                     r.push(*el / rhs)
                 }
