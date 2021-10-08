@@ -48,35 +48,7 @@ impl<'a, T> Iterator for MatrixIter<'a, T>{
     }
 }
 
-/*
-pub struct MatrixIterMut<'a, T> {
-    data: &'a mut Matrix<T>,
-    ind_axe0 : usize,
-    ind_axe1 : usize,
-    axe : bool
-}
 
-impl<'a, T> Iterator for MatrixIterMut<'a, T>{ 
-    type Item = &'a mut T;
-    fn next(& mut self) ->Option<Self::Item> {
-    if self.axe {
-        while self.ind_axe1 < self.data.shape.1{
-            self.ind_axe1 += 1;
-            return Some(self.data.values.iter_mut().nth(0).unwrap())
-         }
-         None
-    }
-    else {
-        while self.ind_axe0 < self.data.shape.0{
-            self.ind_axe0 += 1;
-            return Some(self.data.get_mut(self.ind_axe0,self.ind_axe1))
-         }
-         None
-    }
-     
-    }
-}
-*/
 impl<'a,T> Matrix<T> {
     pub fn col_iter(&'a self, i : usize) -> MatrixIter<'a, T> {
         if  i>= self.shape.1 {
