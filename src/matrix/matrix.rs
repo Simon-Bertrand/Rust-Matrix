@@ -97,7 +97,6 @@ impl<T> Matrix<T> {
 
 
 impl<T: std::clone::Clone + Copy> Matrix<T> {
-
     pub fn row(&self, i:usize) -> Matrix<T> {
         if  i>= self.shape.0 {
             eprintln!("\nfn row(&self, i:usize) >>> The row indice is out of range : {} is not in [{}-{}]. \n", i, 0, self.shape.0-1);
