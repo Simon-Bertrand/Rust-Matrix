@@ -16,6 +16,9 @@ macro_rules! sub_impl {
             pub fn resolve_system(&self, vect_b : &Matrix<$t>) -> Matrix<$t> {
                 core_resolve_system(self, vect_b, -1.0)
             }
+            pub fn is_invertible(&self)  -> bool {
+                !core_lu_decomposition(self,-1.0).2.has_full_zeros_in_rows()
+            }
             pub fn invert(&self)  -> Matrix<$t> {
                 core_invert(self, -1.00)
             }
@@ -37,6 +40,9 @@ macro_rules! sub_impl {
             pub fn resolve_system(&self, vect_b : &Matrix<$t>) -> Matrix<Ratio<$t>> {
                 core_resolve_system(&(self.clone_to_ratio()), &vect_b.clone_to_ratio(),Ratio::new(-1,1))
             }
+            pub fn is_invertible(&self)  -> bool {
+                !core_lu_decomposition(&self.clone_to_ratio(),Ratio::new(-1,1)).2.has_full_zeros_in_rows()
+            }
             pub fn invert(&self)  -> Matrix<Ratio<$t>> {
                 core_invert(&(self.clone_to_ratio()), Ratio::new(-1,1))
             }
@@ -57,13 +63,16 @@ macro_rules! sub_impl {
             pub fn resolve_system(&self, vect_b : &Matrix<$t>) -> Matrix<$t> {
                 core_resolve_system(self, vect_b, Ratio::new(-1,1))
             }
+            pub fn is_invertible(&self)  -> bool {
+                !core_lu_decomposition(self, Ratio::new(-1,1)).2.has_full_zeros_in_rows()
+            }
             pub fn invert(&self)  -> Matrix<$t> {
                 core_invert(self, Ratio::new(-1,1))
             }
             pub fn det(&self) -> $t {
                 core_det(self, Ratio::new(-1,1))
             }
-            }
+        }
 )*)
 }
 sub_impl! { Ratio<i32> Ratio<i64>}
@@ -157,16 +166,23 @@ fn core_resolve_system<T : Copy + Zero + One + Clone + NumOps + PartialOrd>(this
     core_resolve_tri_using_lu(this, vect_b, &core_lu_decomposition(this,negative_id))
 }
 
-fn core_invert<T : Zero + Copy + Zero + One + Clone + NumOps + PartialOrd>(this : &Matrix<T>, negative_id : T)  -> Matrix<T> {
+fn core_invert<T : std::fmt::Display +  Zero + Copy + Zero + One + Clone + NumOps + PartialOrd>(this : &Matrix<T>, negative_id : T)  -> Matrix<T> {
     let lu_decomp = core_lu_decomposition(this,negative_id);
-    let mut matrix_inv = Matrix::<T>::fill(0,0, Zero::zero());
-    for i in 0..this.shape.0 {
-        let mut vect_ei = Matrix::<T>::fill(this.shape.0,1,Zero::zero());
-        *vect_ei.get_mut(i,0)=One::one();
-        matrix_inv.concat(&core_resolve_tri_using_lu(this,&vect_ei, &lu_decomp));
+    if !lu_decomp.2.has_full_zeros_in_rows(){
+        let mut matrix_inv = Matrix::<T>::fill(0,0, Zero::zero());
+        for i in 0..this.shape.0 {
+            let mut vect_ei = Matrix::<T>::fill(this.shape.0,1,Zero::zero());
+            *vect_ei.get_mut(i,0)=One::one();
+
+            matrix_inv.concat(&core_resolve_tri_using_lu(this,&vect_ei, &lu_decomp));
+        }
+        matrix_inv
+    }
+    else {
+        eprintln!("\nfn invert(this : Matrix<$t>>) >>> Matrix is a singular one. Inversion is not possible.");
+        std::process::exit(-1);
     }
     
-    matrix_inv
 }
 
 fn core_det<T : Zero + Copy + Zero + One + Clone + NumOps + PartialOrd>(this : &Matrix<T>, negative_id : T) -> T {

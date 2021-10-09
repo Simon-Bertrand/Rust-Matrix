@@ -11,11 +11,8 @@ include!("mod.rs");
 fn main() {
 
   
-    let matrix_a: Matrix<i32> = Matrix::<i32> {values: vec![1, 2, 3, 4], shape:(2,2)};
-    
-    matrix_a.show();
-    for el in matrix_a.row_iter(1) {
-        println!("{}", el);
-    }
-
+    let mat_a: Matrix<i32> = Matrix::<i32> {values: vec![1, 2, 3, 4, 5, 6, 7, 8, 0], shape:(3,3)};
+    *mat_a.col(0).get_mut(0,0) = 5;
+    mat_a.col(0).show();
+    println!("{}", mat_a.col(0))
 }

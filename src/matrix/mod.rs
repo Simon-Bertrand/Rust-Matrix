@@ -5,6 +5,7 @@ pub mod matrix;
 mod operators;
 pub mod decomposition;
 pub mod transformations;
+pub mod boolean;
 
 mod math;
 
