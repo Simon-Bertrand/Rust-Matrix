@@ -73,30 +73,31 @@ impl<T : Zero + PartialOrd> Matrix<T> {
     pub fn compare_lower(&self, val : &T, or_equal : bool) -> Matrix<bool> {
         core_compare(self, val, (false,true, or_equal))
     }
-
     pub fn compare_equal(&self, val : &T) -> Matrix<bool> {
         core_compare(self, val, (false,true, false))
     }
 }
 
 
-
 macro_rules! sub_impl {
     ($($t:ty)*) => ($(
-        impl Mul<&Matrix<$t>> for $t { type Output = Matrix<$t> ; fn mul(self, rhs: &Matrix<$t>) -> Matrix<$t> {rhs*(self)}}
-        impl Mul<Matrix<$t>> for $t { type Output = Matrix<$t>; fn mul(self, rhs: Matrix<$t>) -> Matrix<$t> {&rhs*(self)}}
-        impl Add<&Matrix<$t>> for $t { type Output = Matrix<$t>; fn add(self, rhs: &Matrix<$t>) -> Matrix<$t> { rhs + (self)}}
-        impl Add<Matrix<$t>> for $t {type Output = Matrix<$t>;fn add(self, rhs: Matrix<$t>) -> Matrix<$t> {&rhs + (self)}}
-        impl Sub<&Matrix<$t>> for $t {type Output = Matrix<$t>;fn sub(self, rhs: &Matrix<$t>) -> Matrix<$t> {rhs - (self)}}
-        impl Sub<Matrix<$t>> for $t {type Output = Matrix<$t>;fn sub(self, rhs: Matrix<$t>) -> Matrix<$t> {&rhs - (self)}}
-        impl Div<&Matrix<$t>> for $t {type Output = Matrix<$t>;fn div(self, rhs: &Matrix<$t>) -> Matrix<$t>{&Matrix::fill(5,5,self) / rhs}}
-        impl Div<Matrix<$t>> for $t {type Output = Matrix<$t>;fn div(self, rhs: Matrix<$t>) -> Matrix<$t>{&Matrix::fill(5,5,self) / &rhs}}
+        impl Mul<&Matrix<$t>> for $t { type Output = Matrix<$t> ; fn mul(self, rhs: &Matrix<$t>) -> Matrix<$t> {core_add_mul_sub_div_with_reals(rhs, self, (false,true))}}
+        impl Mul<Matrix<$t>> for $t { type Output = Matrix<$t> ; fn mul(self, rhs: Matrix<$t>) -> Matrix<$t> {core_add_mul_sub_div_with_reals(&rhs, self, (false,true))}}
+
+        impl Add<&Matrix<$t>> for $t { type Output = Matrix<$t>; fn add(self, rhs: &Matrix<$t>) -> Matrix<$t> {core_add_mul_sub_div_with_reals(rhs, self, (false,false))}}
+        impl Add<Matrix<$t>> for $t { type Output = Matrix<$t>; fn add(self, rhs: Matrix<$t>) -> Matrix<$t> {core_add_mul_sub_div_with_reals(&rhs, self, (false,false))}}
+
+        impl Sub<&Matrix<$t>> for $t {type Output = Matrix<$t>;fn sub(self, rhs: &Matrix<$t>) -> Matrix<$t> {core_add_mul_sub_div_with_reals(rhs, self, (true,false))}}
+        impl Sub<Matrix<$t>> for $t {type Output = Matrix<$t>;fn sub(self, rhs: Matrix<$t>) -> Matrix<$t> {core_add_mul_sub_div_with_reals(&rhs, self, (true,false))}}
+
+        impl Div<&Matrix<$t>> for $t {type Output = Matrix<$t>;fn div(self, rhs: &Matrix<$t>) -> Matrix<$t>{core_add_mul_sub_div_with_reals(rhs, self, (true,true))}}
+        impl Div<Matrix<$t>> for $t {type Output = Matrix<$t>;fn div(self, rhs: Matrix<$t>) -> Matrix<$t>{core_add_mul_sub_div_with_reals(&rhs, self, (true,true))}}
     )*)
 }
-sub_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
+sub_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 Ratio<i32> Ratio<i64>}
 
 
-fn core_add_mul_sub_div_with_reals<T : Copy + Add<Output = T> + Div<Output = T> + Mul<Output = T> + Sub<Output = T>>(this : &Matrix<T>, val : T, operator : (bool,bool)) -> Matrix<T>{
+fn core_add_mul_sub_div_with_reals<T : Copy + NumOps>(this : &Matrix<T>, val : T, operator : (bool,bool)) -> Matrix<T>{
     Matrix::<T>{ 
         values: {
             let mut r: Vec<T> = Vec::with_capacity(&this.shape.0*(&this).shape.1); 
@@ -156,6 +157,8 @@ impl<T : Copy + NumOps> Div<T> for Matrix<T>
 
 
 
+
+
 fn core_add_mul_sub_div_with_matrix<T : Copy + NumOps>(this : &Matrix<T>, rhs : &Matrix<T>, operator : (bool,bool)) -> Matrix<T> {
     Matrix::<T>{ 
         values: {
@@ -170,40 +173,22 @@ fn core_add_mul_sub_div_with_matrix<T : Copy + NumOps>(this : &Matrix<T>, rhs : 
         shape:this.shape    
     }
 }
-
 impl<T : NumOps + Copy> Add<&Matrix<T>> for &Matrix<T>
 { type Output = Matrix<T>;
     fn add(self, rhs: &Matrix<T>) -> Matrix<T> {
         core_add_mul_sub_div_with_matrix(&self, rhs, (false,false))} 
 }
-/*
-impl<T : Add + Copy> Add<Matrix<T>> for &Matrix<T> { type Output = Matrix<T::Output>; fn add(self, rhs: Matrix<T>) -> Matrix<T::Output>{ self + rhs }}
-impl<T : Add + Copy> Add<&Matrix<T>> for Matrix<T> { type Output = Matrix<T::Output>; fn add(self, rhs: &Matrix<T>) -> Matrix<T::Output>{ self + rhs }}
-impl<T : Add + Copy> Add<Matrix<T>> for Matrix<T> { type Output = Matrix<T::Output>; fn add(self, rhs: Matrix<T>) -> Matrix<T::Output>{ self + rhs }}
-*/
-
 impl<T : NumOps + Copy> Sub<&Matrix<T>> for &Matrix<T>
 { type Output = Matrix<T>;
     fn sub(self, rhs: &Matrix<T>) -> Matrix<T> {
         core_add_mul_sub_div_with_matrix(&self, rhs, (true,false))} 
 }
-/*
-impl<T : Sub + Copy> Sub<Matrix<T>> for &Matrix<T> { type Output = Matrix<T::Output>; fn sub(self, rhs: Matrix<T>) -> Matrix<T::Output>{ self - rhs }}
-impl<T : Sub + Copy> Sub<&Matrix<T>> for Matrix<T> { type Output = Matrix<T::Output>; fn sub(self, rhs: &Matrix<T>) -> Matrix<T::Output>{ self - rhs }}
-impl<T : Sub + Copy> Sub<Matrix<T>> for Matrix<T> { type Output = Matrix<T::Output>; fn sub(self, rhs: Matrix<T>) -> Matrix<T::Output>{ self - rhs }}
-*/
-
-
 impl<T : NumOps +  Copy> Div<&Matrix<T>> for &Matrix<T> {
     type Output = Matrix<T>;
     fn div(self, rhs: &Matrix<T>) -> Matrix<T>{
             // Need zero division check       
             core_add_mul_sub_div_with_matrix(&self, rhs, (false,false))}  
 }
-/*
-impl<T : Div + Copy> Div<Matrix<T>> for &Matrix<T> { type Output = Matrix<T::Output>; fn div(self, rhs: Matrix<T>) -> Matrix<T::Output>{ self / rhs }}
-impl<T : Div + Copy> Div<&Matrix<T>> for Matrix<T> { type Output = Matrix<T::Output>; fn div(self, rhs: &Matrix<T>) -> Matrix<T::Output>{ self / rhs }}
-impl<T : Div + Copy> Div<Matrix<T>> for Matrix<T> { type Output = Matrix<T::Output>; fn div(self, rhs: Matrix<T>) -> Matrix<T::Output>{ self / rhs }}
-*/
+
 
 

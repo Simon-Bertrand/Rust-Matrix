@@ -3,26 +3,57 @@ use crate::matrix::constructors::Constructors;
 use num_traits::NumOps;
 use num_traits::Zero;
 use num_traits::One;
-
 use num_rational::Ratio;
 
    
+pub trait LUDecomposition<T,U> {
+    fn lu_decomposition(&self) -> (Matrix<U>,Matrix<U>,Matrix<U>,usize);
+    fn resolve_system(&self, vect_b : &Matrix<T>) -> Matrix<U>;
+    fn is_invertible(&self)  -> bool;
+    fn invert(&self)  -> Matrix<U>;
+    fn det(&self) -> U;
+}
+
 macro_rules! sub_impl {
     ($($t:ty)*) => ($(
-        impl Matrix<$t> {
-            pub fn lu_decomposition(&self) -> (Matrix<$t>,Matrix<$t>,Matrix<$t>,usize){
+        impl LUDecomposition<$t,Ratio<$t>> for Matrix<$t> {
+            fn lu_decomposition(&self) -> (Matrix<Ratio<$t>>,Matrix<Ratio<$t>>,Matrix<Ratio<$t>>,usize){
+                core_lu_decomposition(&(self.clone_to_ratio()), Ratio::new(-1,1))
+            }
+            fn resolve_system(&self, vect_b : &Matrix<$t>) -> Matrix<Ratio<$t>> {
+                core_resolve_system(&(self.clone_to_ratio()), &vect_b.clone_to_ratio(),Ratio::new(-1,1))
+            }
+            fn is_invertible(&self)  -> bool {
+                !core_lu_decomposition(&self.clone_to_ratio(),Ratio::new(-1,1)).2.has_full_zeros_in_rows()
+            }
+            fn invert(&self)  -> Matrix<Ratio<$t>> {
+                core_invert(&(self.clone_to_ratio()), Ratio::new(-1,1))
+            }
+            fn det(&self) -> Ratio<$t> {
+                core_det(&(self.clone_to_ratio()), Ratio::new(-1,1))
+            }
+        }
+)*)
+}
+sub_impl! { i32 i64 }
+
+
+macro_rules! sub_impl {
+    ($($t:ty)*) => ($(
+        impl LUDecomposition<$t,$t> for Matrix<$t> {
+            fn lu_decomposition(&self) -> (Matrix<$t>,Matrix<$t>,Matrix<$t>,usize){
                 core_lu_decomposition(self, -1.0)
             }
-            pub fn resolve_system(&self, vect_b : &Matrix<$t>) -> Matrix<$t> {
+            fn resolve_system(&self, vect_b : &Matrix<$t>) -> Matrix<$t> {
                 core_resolve_system(self, vect_b, -1.0)
             }
-            pub fn is_invertible(&self)  -> bool {
+            fn is_invertible(&self)  -> bool {
                 !core_lu_decomposition(self,-1.0).2.has_full_zeros_in_rows()
             }
-            pub fn invert(&self)  -> Matrix<$t> {
+            fn invert(&self)  -> Matrix<$t> {
                 core_invert(self, -1.00)
             }
-            pub fn det(&self) -> $t {
+            fn det(&self) -> $t {
                 core_det(self, -1.0)
             }
         }
@@ -33,43 +64,20 @@ sub_impl! { f32 f64 }
 
 macro_rules! sub_impl {
     ($($t:ty)*) => ($(
-        impl Matrix<$t> {
-            pub fn lu_decomposition(&self) -> (Matrix<Ratio<$t>>,Matrix<Ratio<$t>>,Matrix<Ratio<$t>>,usize){
-                core_lu_decomposition(&(self.clone_to_ratio()), Ratio::new(-1,1))
-            }
-            pub fn resolve_system(&self, vect_b : &Matrix<$t>) -> Matrix<Ratio<$t>> {
-                core_resolve_system(&(self.clone_to_ratio()), &vect_b.clone_to_ratio(),Ratio::new(-1,1))
-            }
-            pub fn is_invertible(&self)  -> bool {
-                !core_lu_decomposition(&self.clone_to_ratio(),Ratio::new(-1,1)).2.has_full_zeros_in_rows()
-            }
-            pub fn invert(&self)  -> Matrix<Ratio<$t>> {
-                core_invert(&(self.clone_to_ratio()), Ratio::new(-1,1))
-            }
-            pub fn det(&self) -> Ratio<$t> {
-                core_det(&(self.clone_to_ratio()), Ratio::new(-1,1))
-            }
-        }
-)*)
-}
-sub_impl! { i32 i64 }
-
-macro_rules! sub_impl {
-    ($($t:ty)*) => ($(
-        impl Matrix<$t> {
-            pub fn lu_decomposition(&self) -> (Matrix<$t>,Matrix<$t>,Matrix<$t>,usize){
+        impl LUDecomposition<$t,$t> for Matrix<$t> {
+            fn lu_decomposition(&self) -> (Matrix<$t>,Matrix<$t>,Matrix<$t>,usize){
                 core_lu_decomposition(self, Ratio::new(-1,1))
             }
-            pub fn resolve_system(&self, vect_b : &Matrix<$t>) -> Matrix<$t> {
+            fn resolve_system(&self, vect_b : &Matrix<$t>) -> Matrix<$t> {
                 core_resolve_system(self, vect_b, Ratio::new(-1,1))
             }
-            pub fn is_invertible(&self)  -> bool {
+            fn is_invertible(&self)  -> bool {
                 !core_lu_decomposition(self, Ratio::new(-1,1)).2.has_full_zeros_in_rows()
             }
-            pub fn invert(&self)  -> Matrix<$t> {
+            fn invert(&self)  -> Matrix<$t> {
                 core_invert(self, Ratio::new(-1,1))
             }
-            pub fn det(&self) -> $t {
+            fn det(&self) -> $t {
                 core_det(self, Ratio::new(-1,1))
             }
         }
@@ -94,7 +102,6 @@ fn core_lu_permut<T : NumOps + Copy + PartialOrd>(matrix_a : &mut Matrix<T>, col
     matrix_a.swap(col, ind_max, true);
     ind_max
 }
-
 
 
 fn core_lu_decomposition<T : NumOps + Clone + Zero + Copy + PartialOrd + One>(this : &Matrix<T>, negative_identity : T) -> (Matrix<T>,Matrix<T>,Matrix<T>,usize){
@@ -136,7 +143,6 @@ fn core_lu_decomposition<T : NumOps + Clone + Zero + Copy + PartialOrd + One>(th
     (matrix_p, matrix_l,matrix_u, num_piv)
     }
 }
-
 
 fn core_resolve_tri_using_lu<T : NumOps + Copy + Zero + One>(this : &Matrix<T>, vect_b : &Matrix<T>, lu_result : &(Matrix<T>,Matrix<T>,Matrix<T>,usize)) -> Matrix<T> {
     let  (matrix_p,matrix_l,matrix_u,_) =lu_result;
@@ -196,7 +202,6 @@ fn core_invert<T : std::fmt::Display +  Zero + Copy + Zero + One + Clone + NumOp
             75,
             20003);
             panic!();
-
     }
     
 }

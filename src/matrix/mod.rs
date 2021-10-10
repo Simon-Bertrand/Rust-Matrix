@@ -3,11 +3,14 @@ pub mod constructors;
 mod display;
 pub mod matrix;
 mod operators;
-mod decomposition;
+
+pub mod conversion;
+
+pub mod decomposition;
 mod transformations;
 pub mod boolean;
 mod exception;
-mod math;
+pub mod math;
 
 #[derive(Debug)]
 pub struct Matrix<T> {

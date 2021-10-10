@@ -1,5 +1,6 @@
 use numru;
 use crate::numru::matrix::Matrix;
+use crate::numru::matrix::decomposition::LUDecomposition;
 
 
 #[test]

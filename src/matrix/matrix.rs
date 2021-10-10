@@ -239,6 +239,15 @@ impl<T> Matrix<T> {
 }
 
 
+
+
+
+
+
+
+
+
+
 fn core_has_full_zeros_in_row_or_col<T : std::fmt::Display + PartialEq + Zero>(this :&Matrix<T>, axe : bool) -> bool {
     if axe {
         for i in 0..this.shape.0 {
