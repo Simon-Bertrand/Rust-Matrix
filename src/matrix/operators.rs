@@ -3,14 +3,15 @@ use std::ops::Add;
 use std::ops::Sub;
 use std::ops::Div;
 use std::cmp::PartialEq;
+use std::cmp::PartialOrd;
+use num_traits::Zero;
 use num_rational::Ratio;
-use num_traits::Num;
+use num_traits::NumOps;
 use crate::matrix::*;
 use crate::matrix::constructors::Constructors;
 
 
-
-impl<T : Num> PartialEq for Matrix<T> {
+impl<T : PartialEq> PartialEq<Matrix<T>> for Matrix<T> {
     fn eq(&self, other: &Self) -> bool {
         if other.shape == self.shape {
             for (i,el) in self.values.iter().enumerate() {
@@ -46,246 +47,163 @@ impl<T : num_integer::Integer + Clone> PartialEq<Matrix<T>> for Matrix<Ratio<T>>
         }
     }
 }
-impl<T : Clone> PartialEq<Matrix<Ratio<T>>> for Matrix<T> {fn eq(&self, other: &Matrix<Ratio<T>>) -> bool {self == other}}
 
-
-impl<T : Mul + Copy> Mul<T> for &Matrix<T>
-{
-    type Output = Matrix<T::Output>;
-    fn mul(self, rhs: T) -> Matrix<T::Output> {
-        Matrix::<T::Output>{ 
-            values: {
-                let mut r: Vec<T::Output> = Vec::with_capacity(&self.shape.0*(&self).shape.1); 
-                for el in (&self).values.iter() {
-                    r.push(*el * rhs)
-                }
-                r},
-            shape:self.shape}    
-        }
-}
-impl<T : Mul + Copy> Mul<T> for Matrix<T>
-{
-    type Output = Matrix<T::Output>;
-    fn mul(self, rhs: T) -> Matrix<T::Output> {&self * rhs}
-}
-
-
-
-macro_rules! sub_impl {
-    ($($t:ty)*) => ($(
-        impl Mul<&Matrix<$t>> for $t {
-            type Output = Matrix<$t>;
-            fn mul(self, rhs: &Matrix<$t>) -> Matrix<$t>{
-                rhs*(self)
+fn core_compare<T : Zero + PartialOrd>(this : &Matrix<T>, val : &T, comparison_type : (bool,bool,bool)) -> Matrix<bool> {
+    Matrix::<bool> {
+        values: {
+            let mut r : Vec<bool> = Vec::with_capacity(this.length());
+            match comparison_type {
+                (false,false, false) =>for i in 0..this.length() {r.push(this.values[i]>*val)},
+                (false,false, true) =>for i in 0..this.length() {r.push(this.values[i]>=*val)},
+                (false, true, false) =>for i in 0..this.length() {r.push(this.values[i]<*val)},
+                (false, true, true) =>for i in 0..this.length() {r.push(this.values[i]<=*val)},
+                (true, false, false) =>for i in 0..this.length() {r.push(this.values[i]==*val)},
+                _ => panic!("Unknow comparison type"),
             }
-        }
-        impl Mul<Matrix<$t>> for $t {
-            type Output = Matrix<$t>;
-            fn mul(self, rhs: Matrix<$t>) -> Matrix<$t>{
-                &rhs*(self)
-            }
-        }
-    )*)
+
+        r},
+        shape: this.shape
+    }
 }
 
-sub_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
+impl<T : Zero + PartialOrd> Matrix<T> {
+    pub fn compare_greater(&self, val : &T, or_equal : bool) -> Matrix<bool> {
+        core_compare(self, val, (false,false, or_equal))
+    }
+    pub fn compare_lower(&self, val : &T, or_equal : bool) -> Matrix<bool> {
+        core_compare(self, val, (false,true, or_equal))
+    }
 
-
-
-
-impl<T : Add + Copy> Add<&Matrix<T>> for &Matrix<T>
-{
-    type Output = Matrix<T::Output>;
-    fn add(self, rhs: &Matrix<T>) -> Matrix<T::Output> {
-        Matrix::<T::Output>{ 
-            values: {
-                let mut r: Vec<T::Output> = Vec::with_capacity((&self).shape.0*(&self).shape.1); 
-                for (i,el) in (&self).values.iter().enumerate() {
-                    r.push(*el + *rhs.values.get(i).unwrap());
-                }
-                r},
-            shape:self.shape}    
-        }
-}
-
-impl<T : Add + Copy> Add<Matrix<T>> for &Matrix<T> { type Output = Matrix<T::Output>; fn add(self, rhs: Matrix<T>) -> Matrix<T::Output>{ self + &rhs }}
-impl<T : Add + Copy> Add<&Matrix<T>> for Matrix<T> { type Output = Matrix<T::Output>; fn add(self, rhs: &Matrix<T>) -> Matrix<T::Output>{ &self + rhs }}
-impl<T : Add + Copy> Add<Matrix<T>> for Matrix<T> { type Output = Matrix<T::Output>; fn add(self, rhs: Matrix<T>) -> Matrix<T::Output>{ &self + &rhs }}
-
-
-impl<T : Add + Copy> Add<T> for &Matrix<T>
-{
-    type Output = Matrix<T::Output>;
-    fn add(self, rhs: T) -> Matrix<T::Output> {
-        Matrix::<T::Output>{ 
-            values: {
-                let mut r: Vec<T::Output> = Vec::with_capacity((&self).shape.0*(&self).shape.1); 
-                for el in (&self).values.iter() {
-                    r.push(*el + rhs)
-                }
-                r},
-            shape:self.shape}    
-        }
-}
-impl<T : Add + Copy> Add<T> for Matrix<T>
-{
-    type Output = Matrix<T::Output>;
-    fn add(self, rhs: T) -> Matrix<T::Output> {&self + rhs}
-}
-
-
-
-macro_rules! sub_impl {
-    ($($t:ty)*) => ($(
-        impl Add<&Matrix<$t>> for $t {
-            type Output = Matrix<$t>;
-            fn add(self, rhs: &Matrix<$t>) -> Matrix<$t>{
-                rhs + (self)
-            }
-        }
-        impl Add<Matrix<$t>> for $t {
-            type Output = Matrix<$t>;
-            fn add(self, rhs: Matrix<$t>) -> Matrix<$t>{
-                &rhs + (self)
-            }
-        }
-    )*)
-}
-
-sub_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
-
-
-
-
-
-impl<T : Sub + Copy> Sub<&Matrix<T>> for &Matrix<T>
-{
-    type Output = Matrix<T::Output>;
-    fn sub(self, rhs: &Matrix<T>) -> Matrix<T::Output> {
-        Matrix::<T::Output>{ 
-            values: {
-                let mut r: Vec<T::Output> = Vec::with_capacity((&self).shape.0*(&self).shape.1); 
-                for (i,el) in (&self).values.iter().enumerate() {
-                    r.push(*el - *rhs.values.get(i).unwrap());
-                }
-                r},
-            shape:self.shape}    
-        }
-}
-
-impl<T : Sub + Copy> Sub<Matrix<T>> for &Matrix<T> { type Output = Matrix<T::Output>; fn sub(self, rhs: Matrix<T>) -> Matrix<T::Output>{ self - &rhs }}
-impl<T : Sub + Copy> Sub<&Matrix<T>> for Matrix<T> { type Output = Matrix<T::Output>; fn sub(self, rhs: &Matrix<T>) -> Matrix<T::Output>{ &self - rhs }}
-impl<T : Sub + Copy> Sub<Matrix<T>> for Matrix<T> { type Output = Matrix<T::Output>; fn sub(self, rhs: Matrix<T>) -> Matrix<T::Output>{ &self - &rhs }}
-
-impl<T : Sub + Copy> Sub<T> for &Matrix<T>
-{
-    type Output = Matrix<T::Output>;
-    fn sub(self, rhs: T) -> Matrix<T::Output> {
-        Matrix::<T::Output>{ 
-            values: {
-                let mut r: Vec<T::Output> = Vec::with_capacity((&self).shape.0*(&self).shape.1); 
-                for el in (&self).values.iter() {
-                    r.push(*el - rhs)
-                }
-                r},
-            shape:self.shape}    
-        }
-}
-impl<T : Sub + Copy> Sub<T> for Matrix<T>
-{
-    type Output = Matrix<T::Output>;
-    fn sub(self, rhs: T) -> Matrix<T::Output> {&self - rhs}
-}
-
-macro_rules! sub_impl {
-    ($($t:ty)*) => ($(
-        impl Sub<&Matrix<$t>> for $t {
-            type Output = Matrix<$t>;
-            fn sub(self, rhs: &Matrix<$t>) -> Matrix<$t>{
-                rhs - (self)
-            }
-        }
-        impl Sub<Matrix<$t>> for $t {
-            type Output = Matrix<$t>;
-            fn sub(self, rhs: Matrix<$t>) -> Matrix<$t>{
-                &rhs - (self)
-            }
-        }
-    )*)
-}
-
-sub_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
-
-
-
-
-
-
-
-
-
-
-impl<T : Div + Copy> Div<&Matrix<T>> for &Matrix<T> {
-    type Output = Matrix<T::Output>;
-    fn div(self, rhs: &Matrix<T>) -> Matrix<T::Output>{
-            // Need zero division check       
-            Matrix::<T::Output>{ 
-                values: {
-                    let mut r: Vec<T::Output> = Vec::with_capacity((&rhs).shape.0*(*rhs).shape.1); 
-                    for (i,el) in (&rhs).values.iter().enumerate() {
-                        r.push(*(&self).values.get(i).expect("Indice not found.") / *el)
-                    }
-                    r},
-                shape:(&rhs).shape
-            }    
+    pub fn compare_equal(&self, val : &T) -> Matrix<bool> {
+        core_compare(self, val, (false,true, false))
     }
 }
 
 
-impl<T : Div + Copy> Div<Matrix<T>> for &Matrix<T> { type Output = Matrix<T::Output>; fn div(self, rhs: Matrix<T>) -> Matrix<T::Output>{ self / &rhs }}
-impl<T : Div + Copy> Div<&Matrix<T>> for Matrix<T> { type Output = Matrix<T::Output>; fn div(self, rhs: &Matrix<T>) -> Matrix<T::Output>{ &self / rhs }}
-impl<T : Div + Copy> Div<Matrix<T>> for Matrix<T> { type Output = Matrix<T::Output>; fn div(self, rhs: Matrix<T>) -> Matrix<T::Output>{ &self / &rhs }}
-
-
-impl<T : Div + Copy> Div<T> for &Matrix<T>
-{
-    type Output = Matrix<T::Output>;
-    fn div(self, rhs: T) -> Matrix<T::Output> {
-        Matrix::<T::Output>{ 
-            values: {
-                let mut r: Vec<T::Output> = Vec::with_capacity((&self).shape.0*(&self).shape.1); 
-                for el in (&self).values.iter() {
-                    r.push(*el / rhs)
-                }
-                r},
-            shape:self.shape}    
-        }
-}
-
-
-impl<T : Div + Copy> Div<T> for Matrix<T>
-{
-    type Output = Matrix<T::Output>;
-    fn div(self, rhs: T) -> Matrix<T::Output> {&self / rhs}
-}
 
 macro_rules! sub_impl {
     ($($t:ty)*) => ($(
-        impl Div<&Matrix<$t>> for $t {
-            type Output = Matrix<$t>;
-            fn div(self, rhs: &Matrix<$t>) -> Matrix<$t>{
-                &Matrix::fill(5,5,self) / rhs
-            }
-        }
-        impl Div<Matrix<$t>> for $t {
-            type Output = Matrix<$t>;
-            fn div(self, rhs: Matrix<$t>) -> Matrix<$t>{
-                &Matrix::fill(5,5,self) / &rhs
-            }
-        }
+        impl Mul<&Matrix<$t>> for $t { type Output = Matrix<$t> ; fn mul(self, rhs: &Matrix<$t>) -> Matrix<$t> {rhs*(self)}}
+        impl Mul<Matrix<$t>> for $t { type Output = Matrix<$t>; fn mul(self, rhs: Matrix<$t>) -> Matrix<$t> {&rhs*(self)}}
+        impl Add<&Matrix<$t>> for $t { type Output = Matrix<$t>; fn add(self, rhs: &Matrix<$t>) -> Matrix<$t> { rhs + (self)}}
+        impl Add<Matrix<$t>> for $t {type Output = Matrix<$t>;fn add(self, rhs: Matrix<$t>) -> Matrix<$t> {&rhs + (self)}}
+        impl Sub<&Matrix<$t>> for $t {type Output = Matrix<$t>;fn sub(self, rhs: &Matrix<$t>) -> Matrix<$t> {rhs - (self)}}
+        impl Sub<Matrix<$t>> for $t {type Output = Matrix<$t>;fn sub(self, rhs: Matrix<$t>) -> Matrix<$t> {&rhs - (self)}}
+        impl Div<&Matrix<$t>> for $t {type Output = Matrix<$t>;fn div(self, rhs: &Matrix<$t>) -> Matrix<$t>{&Matrix::fill(5,5,self) / rhs}}
+        impl Div<Matrix<$t>> for $t {type Output = Matrix<$t>;fn div(self, rhs: Matrix<$t>) -> Matrix<$t>{&Matrix::fill(5,5,self) / &rhs}}
     )*)
 }
-
 sub_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f32 f64 }
+
+
+fn core_add_mul_sub_div_with_reals<T : Copy + Add<Output = T> + Div<Output = T> + Mul<Output = T> + Sub<Output = T>>(this : &Matrix<T>, val : T, operator : (bool,bool)) -> Matrix<T>{
+    Matrix::<T>{ 
+        values: {
+            let mut r: Vec<T> = Vec::with_capacity(&this.shape.0*(&this).shape.1); 
+            match operator {
+                (false,false)=>for el in (&this).values.iter() {r.push(*el + val)},
+                (false,true)=>for el in (&this).values.iter() {r.push(*el * val)},
+                (true,false)=>for el in (&this).values.iter() {r.push(*el - val)},
+                (true,true)=>for el in (&this).values.iter() {r.push(*el / val)},
+            }
+            r},
+        shape:this.shape
+    }    
+}
+
+impl<T : Copy + NumOps> Mul<T> for &Matrix<T>
+{ type Output = Matrix<T>;
+    fn mul(self, rhs: T) -> Matrix<T> {
+       core_add_mul_sub_div_with_reals(&self, rhs, (false,true))
+    }
+}
+impl<T : Copy + NumOps> Mul<T> for Matrix<T>
+{ type Output = Matrix<T>;
+    fn mul(self, rhs: T) -> Matrix<T> {&self * rhs}}
+
+
+impl<T : Copy + NumOps> Add<T> for &Matrix<T>
+{ type Output = Matrix<T>;
+    fn add(self, rhs: T) -> Matrix<T> {
+       core_add_mul_sub_div_with_reals(&self, rhs, (false,false))
+    }
+}
+impl<T : Copy + NumOps> Add<T> for Matrix<T>
+{ type Output = Matrix<T>;
+    fn add(self, rhs: T) -> Matrix<T> {&self + rhs}}
+
+
+impl<T : Copy + NumOps> Sub<T> for &Matrix<T>
+{ type Output = Matrix<T>;
+    fn sub(self, rhs: T) -> Matrix<T> {
+       core_add_mul_sub_div_with_reals(&self, rhs, (true,false))
+    }
+}
+impl<T : Copy + NumOps> Sub<T> for Matrix<T>
+{ type Output = Matrix<T>;
+    fn sub(self, rhs: T) -> Matrix<T> {&self - rhs}}
+
+
+impl<T : Copy + NumOps> Div<T> for &Matrix<T>
+{ type Output = Matrix<T>;
+    fn div(self, rhs: T) -> Matrix<T> {
+       core_add_mul_sub_div_with_reals(&self, rhs, (true,true))
+    }
+}
+impl<T : Copy + NumOps> Div<T> for Matrix<T>
+{ type Output = Matrix<T>;
+    fn div(self, rhs: T) -> Matrix<T> {&self / rhs}}
+
+
+
+fn core_add_mul_sub_div_with_matrix<T : Copy + NumOps>(this : &Matrix<T>, rhs : &Matrix<T>, operator : (bool,bool)) -> Matrix<T> {
+    Matrix::<T>{ 
+        values: {
+            let mut r: Vec<T> = Vec::with_capacity((&this).shape.0*(&this).shape.1);
+            match operator {
+                (false,false)=>for (i,el) in (&this).values.iter().enumerate() {r.push(*el + *rhs.values.get(i).unwrap());},
+                (false,true)=>for (i,el) in (&this).values.iter().enumerate() {r.push(*el * *rhs.values.get(i).unwrap())},
+                (true,false)=>for (i,el) in (&this).values.iter().enumerate() { r.push(*el - *rhs.values.get(i).unwrap());},
+                (true,true)=>for (i,el) in (&rhs).values.iter().enumerate() { r.push(*(&this).values.get(i).expect("Indice not found.") / *el)},
+            } 
+            r},
+        shape:this.shape    
+    }
+}
+
+impl<T : NumOps + Copy> Add<&Matrix<T>> for &Matrix<T>
+{ type Output = Matrix<T>;
+    fn add(self, rhs: &Matrix<T>) -> Matrix<T> {
+        core_add_mul_sub_div_with_matrix(&self, rhs, (false,false))} 
+}
+/*
+impl<T : Add + Copy> Add<Matrix<T>> for &Matrix<T> { type Output = Matrix<T::Output>; fn add(self, rhs: Matrix<T>) -> Matrix<T::Output>{ self + rhs }}
+impl<T : Add + Copy> Add<&Matrix<T>> for Matrix<T> { type Output = Matrix<T::Output>; fn add(self, rhs: &Matrix<T>) -> Matrix<T::Output>{ self + rhs }}
+impl<T : Add + Copy> Add<Matrix<T>> for Matrix<T> { type Output = Matrix<T::Output>; fn add(self, rhs: Matrix<T>) -> Matrix<T::Output>{ self + rhs }}
+*/
+
+impl<T : NumOps + Copy> Sub<&Matrix<T>> for &Matrix<T>
+{ type Output = Matrix<T>;
+    fn sub(self, rhs: &Matrix<T>) -> Matrix<T> {
+        core_add_mul_sub_div_with_matrix(&self, rhs, (true,false))} 
+}
+/*
+impl<T : Sub + Copy> Sub<Matrix<T>> for &Matrix<T> { type Output = Matrix<T::Output>; fn sub(self, rhs: Matrix<T>) -> Matrix<T::Output>{ self - rhs }}
+impl<T : Sub + Copy> Sub<&Matrix<T>> for Matrix<T> { type Output = Matrix<T::Output>; fn sub(self, rhs: &Matrix<T>) -> Matrix<T::Output>{ self - rhs }}
+impl<T : Sub + Copy> Sub<Matrix<T>> for Matrix<T> { type Output = Matrix<T::Output>; fn sub(self, rhs: Matrix<T>) -> Matrix<T::Output>{ self - rhs }}
+*/
+
+
+impl<T : NumOps +  Copy> Div<&Matrix<T>> for &Matrix<T> {
+    type Output = Matrix<T>;
+    fn div(self, rhs: &Matrix<T>) -> Matrix<T>{
+            // Need zero division check       
+            core_add_mul_sub_div_with_matrix(&self, rhs, (false,false))}  
+}
+/*
+impl<T : Div + Copy> Div<Matrix<T>> for &Matrix<T> { type Output = Matrix<T::Output>; fn div(self, rhs: Matrix<T>) -> Matrix<T::Output>{ self / rhs }}
+impl<T : Div + Copy> Div<&Matrix<T>> for Matrix<T> { type Output = Matrix<T::Output>; fn div(self, rhs: &Matrix<T>) -> Matrix<T::Output>{ self / rhs }}
+impl<T : Div + Copy> Div<Matrix<T>> for Matrix<T> { type Output = Matrix<T::Output>; fn div(self, rhs: Matrix<T>) -> Matrix<T::Output>{ self / rhs }}
+*/
 
 

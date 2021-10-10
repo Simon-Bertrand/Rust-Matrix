@@ -3,8 +3,8 @@ pub mod constructors;
 mod display;
 pub mod matrix;
 mod operators;
-pub mod decomposition;
-pub mod transformations;
+mod decomposition;
+mod transformations;
 pub mod boolean;
 
 mod math;

@@ -7,12 +7,14 @@
 include!("mod.rs");
 
 //use crate::matrix::constructors::Constructors;
-//use num_rational::Ratio;
+//use num_rational::Rational32;
 fn main() {
 
-  
-    let mat_a: Matrix<i32> = Matrix::<i32> {values: vec![1, 2, 3, 4, 5, 6, 7, 8, 0], shape:(3,3)};
-    *mat_a.col(0).get_mut(0,0) = 5;
-    mat_a.col(0).show();
-    println!("{}", mat_a.col(0))
+    let mut mat_a: Matrix<f64> = Matrix::<f64> {values: vec![-1.0, 1.0, 2.0, -2.0 ], shape:(2,2)};
+
+    let mut mat_b: Matrix<f64> = Matrix::<f64> {values: vec![1.0, 2.0, 3.0, 4.0 ], shape:(2,2)};
+
+    (&mat_a-&mat_b).show();
+
+
 }

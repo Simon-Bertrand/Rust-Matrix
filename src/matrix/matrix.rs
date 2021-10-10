@@ -27,6 +27,12 @@ impl<T> Matrix<T> {
     }
 }
 
+impl<T> Matrix<T> {
+    pub fn length(&self) -> usize {
+        self.shape.0*self.shape.1
+    }
+}
+
 
 pub struct MatrixIter<'a, T> {
     data: &'a Matrix<T>,
@@ -220,6 +226,28 @@ impl<T : Zero + PartialEq + std::fmt::Display> Matrix<T> {
         core_has_full_zeros_in_row_or_col(self, false)
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 macro_rules! sub_impl {

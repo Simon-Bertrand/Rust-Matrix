@@ -17,3 +17,11 @@ fn matrix_mul_and_div_with_reals() {
     assert_eq!(mat_ones/3.0, *mat_thirds, "Testing Mat_of_ones / 3 = Mat_of_thirds");
     assert_eq!(*mat_ones, 3.0*mat_thirds, "Testing Mat_of_ones =  3 *Mat_of_thirds");
 }
+
+#[test]
+fn matrix_comparison() {
+    let mat_a: Matrix<i32> = Matrix::<i32> {values: vec![1,2,3,4,5,6,7,8,9], shape:(3,3)};
+    assert_eq!(mat_a.compare_greater(&2, false), mat_a.compare_lower(&2, true).not(), "Testing A>2 = not(A<=2)");
+    assert_eq!( mat_a.compare_greater(&2, true), mat_a.compare_lower(&2, false).not(), "Testing A>=2 = not(A<2)");
+
+}

@@ -87,7 +87,7 @@ impl<T : std::fmt::Display + Copy> Matrix<T> {
             r}, shape:(self.shape.1,self.shape.0)}
     }
 
-    pub fn transpose(&mut self) -> &Self {
+    pub fn transpose(&mut self) -> &mut Self {
             self.values = {
                 let mut temp_val = self.values.clone();
                 for (klin,el) in temp_val.iter_mut().enumerate() {
@@ -97,6 +97,16 @@ impl<T : std::fmt::Display + Copy> Matrix<T> {
             };
             self.shape = (self.shape.1,self.shape.0);
             self
+    }
+    pub fn reshape(&mut self, i_new : usize, j_new : usize) -> &mut Self {
+        if i_new*j_new != self.length() {
+            eprintln!("\nfn reshape(&mut self, i_new : usize, j_new : usize)  >>> The product of the new indices is not equal to the product of the current matrix shapes. \n");
+            std::process::exit(-1);
+        }
+        else {
+            self.shape = (i_new,j_new)
+        }
+        self
     }
 }
 
