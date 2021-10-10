@@ -6,7 +6,7 @@ mod operators;
 mod decomposition;
 mod transformations;
 pub mod boolean;
-
+mod exception;
 mod math;
 
 #[derive(Debug)]

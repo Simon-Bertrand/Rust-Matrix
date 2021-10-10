@@ -28,8 +28,13 @@ fn core_add_mul(this : &Matrix<bool>, m : &Matrix<bool>, add: bool) -> Matrix<bo
         }
     }
     else {
-        eprintln!("\nfn dot(&self, M: &Matrix) >>> Can't add boolean matrix because of different shapes.\n");
-        std::process::exit(-1);
+        exception::raise_exception(
+            &"core_add_mul",
+            &mut String::from("Shapes are to the same to compute element-wise mul or add."),
+            String::from("Choose matrix A and B such as A.shape==B.shape"),
+            100,
+            10001);
+            panic!();
     }  
 }
 
@@ -77,8 +82,13 @@ impl<T : Copy + Zero + PartialEq + std::fmt::Display> Matrix<T> {
             }
         }
         else {
-            eprintln!("\nfn select(&self, M: &Matrix) >>> The mask shape needs to be the same as self matrix.\n");
-            std::process::exit(-1);
+            exception::raise_exception(
+                &"select",
+                &mut String::from("The mask shape needs to be the same as self matrix."),
+                String::from("Choose matrix A and B such as A.shape==B.shape"),
+                100,
+                10002);
+                panic!();
         }
         
     }
@@ -113,8 +123,13 @@ impl<'a, T> Iterator for MatrixMaskIter<'a, T>{
 impl<'a,T> Matrix<T> {
     pub fn select_iter(&'a self, mask : &'a Matrix<bool>) -> MatrixMaskIter<'a, T> {
         if  mask.shape != self.shape {
-            eprintln!("\nfn select_iter(&self, M: &Matrix) >>> The mask shape needs to be the same as self matrix.\n");
-            std::process::exit(-1);
+            exception::raise_exception(
+                &"select_iter",
+                &mut String::from("The mask shape needs to be the same as self matrix."),
+                String::from("Choose matrix A and B such as A.shape==B.shape"),
+                100,
+                10003);
+                panic!();
         }
         else {
             MatrixMaskIter::<'a, T> { data: &self, mask: &mask, index : 0}

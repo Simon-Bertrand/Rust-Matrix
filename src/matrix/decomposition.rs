@@ -99,8 +99,13 @@ fn core_lu_permut<T : NumOps + Copy + PartialOrd>(matrix_a : &mut Matrix<T>, col
 
 fn core_lu_decomposition<T : NumOps + Clone + Zero + Copy + PartialOrd + One>(this : &Matrix<T>, negative_identity : T) -> (Matrix<T>,Matrix<T>,Matrix<T>,usize){
     if this.shape.0 != this.shape.1 {
-        eprintln!("\nfn LU_lower_generator(permuted_matrix : &Matrix<$t>, col : i32) >>> The matrix is not square.");
-        std::process::exit(-1);
+        exception::raise_exception(
+            &"LU_lower_generator",
+            &mut String::from("The matrix is not square."),
+            String::from("Choose matrix A such as A.shape.0==A.shape.1"),
+            75,
+            20001);
+            panic!();
     }
     else {
         let mut num_piv : usize =  0;
@@ -160,8 +165,13 @@ fn core_resolve_tri_using_lu<T : NumOps + Copy + Zero + One>(this : &Matrix<T>, 
 
 fn core_resolve_system<T : Copy + Zero + One + Clone + NumOps + PartialOrd>(this : &Matrix<T>, vect_b : &Matrix<T>, negative_id :T) -> Matrix<T> {
     if  !(vect_b.is_col()) || (this.shape.1 != vect_b.shape.0) {
-        eprintln!("\nfn resolve_system(matrix_a : Matrix<$t>, vect_b : Matrix<$t>) >>> Shapes are incompatible to resolve a system.");
-        std::process::exit(-1);
+        exception::raise_exception(
+            &"core_resolve_system",
+            &mut String::from("Shapes are incompatible to resolve a system."),
+            String::from("Choose matrix A and a vector B such as A.shape == (n,n) and B.shape ==(n,1)"),
+            75,
+            20002);
+            panic!();
     }
     core_resolve_tri_using_lu(this, vect_b, &core_lu_decomposition(this,negative_id))
 }
@@ -179,16 +189,27 @@ fn core_invert<T : std::fmt::Display +  Zero + Copy + Zero + One + Clone + NumOp
         matrix_inv
     }
     else {
-        eprintln!("\nfn invert(this : Matrix<$t>>) >>> Matrix is a singular one. Inversion is not possible.");
-        std::process::exit(-1);
+        exception::raise_exception(
+            &"core_invert",
+            &mut String::from("Matrix is a singular one. Inversion is not possible."),
+            String::from("Choose a matrix A that is not singular."),
+            75,
+            20003);
+            panic!();
+
     }
     
 }
 
 fn core_det<T : Zero + Copy + Zero + One + Clone + NumOps + PartialOrd>(this : &Matrix<T>, negative_id : T) -> T {
         if  this.shape.1 != this.shape.0 {
-            eprintln!("\nfn det(&self) >>> Matrix is not square to compute the determinant.");
-            std::process::exit(-1);
+            exception::raise_exception(
+                &"core_det",
+                &mut String::from("Matrix is not square to compute the determinant."),
+                String::from("Choose a matrix A such as A.shape.0==A.shape.1"),
+                75,
+                20004);
+                panic!();
         }
         else {
             let (_matrix_p,matrix_l,matrix_u,num_piv) = core_lu_decomposition(this,negative_id);

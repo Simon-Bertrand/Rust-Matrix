@@ -7,9 +7,14 @@ use num_traits::NumOps;
 
 impl<T> Matrix<T> {
     pub fn get(&self, i:usize, j:usize) -> &T {
-        if i>= self.shape.0 {
-            eprintln!("\nfn get_mut(&mut self, i:usize, j:usize) >>> The indice is out of range : {} is not in [{}-{}] or {} is not in [{}-{}] . \n", i, 0, self.shape.0-1, j, 0, self.shape.1-1);
-            std::process::exit(-1);
+        if i>= self.shape.0 || j>=self.shape.1 {
+            exception::raise_exception(
+                &"get",
+                &mut String::from(format!("The indice is out of range : {} is not in [{}-{}] or {} is not in [{}-{}].", i, 0, self.shape.0-1, j, 0, self.shape.1-1)),
+                String::from("Choose indices i and j contained in the correct domains."),
+                100,
+                30001);
+                panic!();
         }
        else {
             return self.values.get(i*self.shape.1 + j).unwrap()
@@ -18,8 +23,14 @@ impl<T> Matrix<T> {
 
     pub fn get_mut(&mut self, i:usize, j:usize) ->  &mut T  {
         if i>= self.shape.0 || j>= self.shape.1 {
-            eprintln!("\nfn get_mut(&mut self, i:usize, j:usize) >>> The indice is out of range : {} is not in [{}-{}] or {} is not in [{}-{}] . \n", i, 0, self.shape.0-1, j, 0, self.shape.1-1);
-            std::process::exit(-1);
+            exception::raise_exception(
+                &"get_mut",
+                &mut String::from(format!("The indice is out of range : {} is not in [{}-{}] or {} is not in [{}-{}].", i, 0, self.shape.0-1, j, 0, self.shape.1-1)),
+                String::from("Choose indices i and j contained in the correct domains."),
+                100,
+                30002);
+                panic!();
+        
         }
        else {
             return self.values.get_mut(i*self.shape.1 + j).unwrap()
@@ -56,8 +67,14 @@ impl<'a, T> Iterator for MatrixIter<'a, T>{
 impl<'a,T> Matrix<T> {
     pub fn col_iter(&'a self, i : usize) -> MatrixIter<'a, T> {
         if  i>= self.shape.1 {
-            eprintln!("\nfn col_iter(&self, j:usize) >>> The col indice is out of range : {} is not in [{}-{}]. \n", i, 0, self.shape.1-1);
-            std::process::exit(-1);
+            exception::raise_exception(
+                &"col_iter",
+                &mut String::from(format!("The col indice is out of range : {} is not in [{}-{}].", i, 0, self.shape.0-1)),
+                String::from("Choose column indice in the correct domain."),
+                100,
+                30003);
+                panic!();
+
         }
         else {
             MatrixIter::<'a, T> { data: &self, ind_axe : i, index : 0, axe : false}
@@ -66,8 +83,13 @@ impl<'a,T> Matrix<T> {
 
     pub fn row_iter(&'a self, i : usize) -> MatrixIter<'a, T> {
         if i>= self.shape.0 {
-            eprintln!("\nfn row_iter(&self, i:usize) >>> The row indice is out of range : {} is not in [{}-{}]. \n", i, 0, self.shape.0-1);
-            std::process::exit(-1);
+            exception::raise_exception(
+                &"row_iter",
+                &mut String::from(format!("The row indice is out of range : {} is not in [{}-{}].", i, 0, self.shape.0-1)),
+                String::from("Choose row indice in the correct domain."),
+                100,
+                30004);
+                panic!();
         }
         else {
             MatrixIter::<'a, T> { data: &self, ind_axe : i, index : 0, axe : true}
@@ -80,8 +102,13 @@ impl<'a,T> Matrix<T> {
 impl<T> Matrix<T> {
     pub fn row_iter_mut(&mut self, i:usize) ->  &mut [T]  {
         if  i>= self.shape.0 {
-            eprintln!("\nfn row_iter_mut(&mut self, i:usize) >>> The row indice is out of range : {} is not in [{}-{}]. \n", i, 0, self.shape.0-1);
-            std::process::exit(-1);
+            exception::raise_exception(
+                &"row_iter_mut",
+                &mut String::from(format!("The row indice is out of range : {} is not in [{}-{}].", i, 0, self.shape.0-1)),
+                String::from("Choose row indice in the correct domain."),
+                100,
+                30005);
+                panic!();
         }
        else {
             return self.values.chunks_mut(self.shape.0).nth(i).unwrap()
@@ -90,8 +117,13 @@ impl<T> Matrix<T> {
 
     pub fn col_iter_mut(&mut self, j:usize) ->  std::iter::StepBy<std::slice::IterMut<'_, T>>  {
         if j>= self.shape.1 {
-            eprintln!("\nfn col_iter(&self, j:usize) >>> The col indice is out of range : {} is not in [{}-{}]. \n", j, 0, self.shape.1-1);
-            std::process::exit(-1);
+            exception::raise_exception(
+                &"col_iter_mut",
+                &mut String::from(format!("The col indice is out of range : {} is not in [{}-{}].", j, 0, self.shape.1-1)),
+                String::from("Choose column indice in the correct domain."),
+                100,
+                30006);
+                panic!();
         }
        else {
             return self.values[j..].iter_mut().step_by(self.shape.0)
@@ -103,8 +135,13 @@ impl<T> Matrix<T> {
 impl<T: std::clone::Clone + Copy> Matrix<T> {
     pub fn row(&self, i:usize) -> Matrix<T> {
         if  i>= self.shape.0 {
-            eprintln!("\nfn row(&self, i:usize) >>> The row indice is out of range : {} is not in [{}-{}]. \n", i, 0, self.shape.0-1);
-            std::process::exit(-1);
+            exception::raise_exception(
+                &"row",
+                &mut String::from(format!("The row indice is out of range : {} is not in [{}-{}].", i, 0, self.shape.0-1)),
+                String::from("Choose row indice in the correct domain."),
+                100,
+                30007);
+                panic!();
         }
        else {
             Matrix::<T> {values:(self.values[(i*self.shape.1)..(i*self.shape.1 + self.shape.0)]).to_vec(), shape:(1,self.shape.1)}
@@ -113,8 +150,14 @@ impl<T: std::clone::Clone + Copy> Matrix<T> {
     
     pub fn col(&self, j:usize) -> Matrix<T> {
         if j>= self.shape.1 {
-            eprintln!("\nfn col(&self, i:usize) >>> The col indice is out of range : {} is not in [{}-{}]. \n", j, 0, self.shape.0-1);
-            std::process::exit(-1);
+            exception::raise_exception(
+                &"col",
+                &mut String::from(format!("The column indice is out of range : {} is not in [{}-{}].", j, 0, self.shape.1-1)),
+                String::from("Choose col indice in the correct domain."),
+                100,
+                30008);
+                panic!();
+
         }
         else {
             Matrix::<T> {values:{let mut r : Vec<T> = Vec::with_capacity(self.shape.0); for col_el in self.col_iter(j) { r.push(*col_el)} r}, shape:(self.shape.0,1)}
@@ -129,31 +172,40 @@ impl<T : std::convert::AsMut<Matrix<T>>> AsMut<Matrix<T>> for Matrix<T> {
         self
     }
 }
+
 impl<T : Copy + Zero + NumOps> Matrix<T>{
     pub fn dot(&self, m: &Matrix<T>) -> Matrix<T> {
         if self.shape.1 != m.shape.0 {
-            eprintln!("\nfn dot(&self, M: &Matrix) >>> The shapes are not compatible for matrix product.\n");
-            std::process::exit(-1);
+            exception::raise_exception(
+                &"dot",
+                &mut String::from(format!("The shapes are not compatible for matrix product : {}!={}", self.shape.1, m.shape.0)),
+                String::from("For matrix A and B, the dot product A.B is computable if A.shape.1==B.shape.0."),
+                100,
+                30008);
+                panic!();
+            
         }
-        Matrix::<T> {
-            values:{
-                let mut r:Vec<T>= Vec::with_capacity(self.shape.1*m.shape.0); 
-                for i in 0..self.shape.0 {
-                    for j in 0..m.shape.1 {
-                        r.push({
-                            let mut sum : T = Zero::zero();
-                                for k in 0..m.shape.0 {
-                                    sum = sum + *self.get(i,k)* *m.get(k,j);
-                                } 
-                                sum
-                        })
+
+        else {
+            Matrix::<T> {
+                values:{
+                    let mut r:Vec<T>= Vec::with_capacity(self.shape.1*m.shape.0); 
+                    for i in 0..self.shape.0 {
+                        for j in 0..m.shape.1 {
+                            r.push({
+                                let mut sum : T = Zero::zero();
+                                    for k in 0..m.shape.0 {
+                                        sum = sum + *self.get(i,k)* *m.get(k,j);
+                                    } 
+                                    sum
+                            })
+                        }
                     }
-                }
-                r
-            },
-            shape: (self.shape.0,m.shape.1)
+                    r
+                },
+                shape: (self.shape.0,m.shape.1)
+            }
         }
- 
     }
 }
 
