@@ -1,6 +1,5 @@
-use numru;
-use crate::numru::matrix::Matrix;
-use crate::numru::matrix::constructors::Constructors;
+use rust_matrix::matrix::*;
+use crate::constructors::Constructors;
 
 #[test]
 fn matrix_addition_and_sub_with_reals() {

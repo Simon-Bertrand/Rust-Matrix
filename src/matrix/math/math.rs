@@ -1,15 +1,13 @@
 use num_traits::Zero;
 use num_traits::Float;
-
 use num_rational::Ratio;
-use crate::matrix::Matrix;
-use crate::matrix::constructors::Constructors;
-
 use num_traits::NumOps;
 use num_traits::FromPrimitive;
     
-use crate::matrix::decomposition::LUDecomposition;
 
+use crate::matrix::* ;
+use crate::matrix::constructors::Constructors;
+use crate::matrix::math::decomposition::LUDecomposition;
 
 
 pub struct Functions<T> { v : T}

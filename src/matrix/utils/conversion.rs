@@ -1,10 +1,9 @@
-use crate::matrix::constructors::Constructors;
- use num_traits::Zero;
-
-use crate::matrix::*;
+use num_traits::Zero;
 use num_traits::AsPrimitive;
-
 use std::convert::From;
+
+use crate::matrix::* ;
+
 
 fn core_convert<T : AsPrimitive<U>, U: Copy + Zero>(this : &Matrix<T>) -> Matrix<U> 
 where U : 'static {

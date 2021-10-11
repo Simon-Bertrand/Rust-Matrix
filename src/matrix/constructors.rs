@@ -1,10 +1,10 @@
-use crate::matrix::*;
-
-
 use rand::Rng;
 use std::vec;
 use num_traits::Zero;
 use num_traits::FromPrimitive;
+
+use crate::matrix::* ;
+
 
 trait Display {
     fn show(&self);

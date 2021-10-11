@@ -1,7 +1,8 @@
-
 use std::cmp::PartialEq;
 use num_traits::Zero;
+
 use crate::matrix::*;
+use crate::matrix::utils::exception;
 
 
 fn core_add_mul(this : &Matrix<bool>, m : &Matrix<bool>, add: bool) -> Matrix<bool> {

@@ -1,6 +1,6 @@
-use numru;
-use crate::numru::matrix::Matrix;
-use crate::numru::matrix::decomposition::LUDecomposition;
+use rust_matrix::matrix::*;
+use crate::math::decomposition::LUDecomposition;
+
 
 use num_rational::Rational32;
 

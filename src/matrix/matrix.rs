@@ -1,7 +1,13 @@
-use crate::matrix::*;
 use num_rational::Ratio;
 use num_traits::Zero;
 use num_traits::NumOps;
+
+
+use crate::matrix::utils::exception;
+use crate::matrix::*;
+
+
+
 
 
 

@@ -1,5 +1,6 @@
 use crate::matrix::*;
 
+
 impl<T : Copy> Matrix<T> {
     pub fn swap(&mut self, i:usize, j:usize, axe:bool) -> &mut Matrix<T> {
         if axe {

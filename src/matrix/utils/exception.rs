@@ -1,4 +1,3 @@
-
 use colored::Colorize;
 
 pub fn raise_exception(function_name : &str, string_message : &mut String, help : String, total_width: usize,  error_code : u16) {

@@ -1,9 +1,9 @@
-use numru;
-use crate::numru::matrix::Matrix;
+use rust_matrix::matrix::*;
+use crate::math::decomposition::LUDecomposition;
+
+
 use num_rational::Rational32;
 
-
-use crate::numru::matrix::decomposition::LUDecomposition;
 
 #[test]
 fn resolve_system_int() {

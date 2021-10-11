@@ -1,11 +1,15 @@
-use crate::matrix::*;
-use crate::matrix::constructors::Constructors;
 use num_traits::NumOps;
 use num_traits::Zero;
 use num_traits::One;
 use num_rational::Ratio;
 
-   
+
+use crate::matrix::* ;
+use crate::matrix::utils::exception;
+use crate::matrix::constructors::Constructors;
+
+
+
 pub trait LUDecomposition<T,U> {
     fn lu_decomposition(&self) -> (Matrix<U>,Matrix<U>,Matrix<U>,usize);
     fn resolve_system(&self, vect_b : &Matrix<T>) -> Matrix<U>;

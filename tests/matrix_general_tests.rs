@@ -1,5 +1,6 @@
-use numru;
-use crate::numru::matrix::Matrix;
+use rust_matrix::matrix::*;
+
+
 
 
 #[test]

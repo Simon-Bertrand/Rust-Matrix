@@ -7,8 +7,8 @@ use std::cmp::PartialOrd;
 use num_traits::Zero;
 use num_rational::Ratio;
 use num_traits::NumOps;
-use crate::matrix::*;
-use crate::matrix::constructors::Constructors;
+
+use crate::matrix::* ;
 
 
 impl<T : PartialEq> PartialEq<Matrix<T>> for Matrix<T> {

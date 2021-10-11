@@ -1,2 +1,2 @@
-# NumRu
-Numerical computing with NumRu on Rust. Matrix objects and linear algebra project.
+# Rust-Matrix
+Numerical computing with Rust-Matrix on Rust. Matrix objects and linear algebra project.
