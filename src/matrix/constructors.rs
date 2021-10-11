@@ -6,10 +6,6 @@ use num_traits::FromPrimitive;
 use crate::matrix::* ;
 
 
-trait Display {
-    fn show(&self);
-}
-
 pub trait Constructors<T> {
     fn new(shape1 : usize, shape2 : usize) -> Self;
     fn fill(shape1 : usize, shape2 : usize, fill_value :T) -> Self;

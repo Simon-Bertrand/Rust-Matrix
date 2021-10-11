@@ -7,6 +7,9 @@ use num_rational::Ratio;
 use crate::matrix::* ;
 use crate::matrix::utils::exception;
 use crate::matrix::constructors::Constructors;
+use crate::matrix::transformations::MatrixMutation;
+use crate::matrix::matrixasks::MatrixAsks;
+
 
 
 

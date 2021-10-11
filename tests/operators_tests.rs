@@ -1,6 +1,10 @@
 use rust_matrix::matrix::*;
 use crate::constructors::Constructors;
 
+use rust_matrix::matrix::specific_impl::boolean::MatrixBool;
+
+
+
 #[test]
 fn matrix_addition_and_sub_with_reals() {
     let mat_twos: &Matrix<f64> =&Matrix::fill(3,3,2.0);

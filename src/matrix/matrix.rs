@@ -1,4 +1,3 @@
-use num_rational::Ratio;
 use num_traits::Zero;
 use num_traits::NumOps;
 
@@ -254,44 +253,24 @@ impl<T> Matrix<T> {
 
 
 
-fn core_has_full_zeros_in_row_or_col<T : std::fmt::Display + PartialEq + Zero>(this :&Matrix<T>, axe : bool) -> bool {
-    if axe {
-        for i in 0..this.shape.0 {
-            let mut compt : usize = 0;
-            for col_el in this.row_iter(i) {
-                if *col_el == Zero::zero() {
-                    compt += 1;
-                    if compt == this.shape.1 {
-                        return true
-                    }
-                }
 
+
+
+impl<T : std::fmt::Display + Copy> Matrix<T> {
+   
+
+    pub fn copy_transpose(&self) -> Matrix<T> {
+        return Matrix::<T> {values: {
+            let mut r : Vec<T> = Vec::with_capacity(self.shape.0*self.shape.1);
+            for i in 0..self.shape.1 {
+                for j in 0..self.shape.0 {
+                    r.push(*self.get(j,i));
+                } 
             }
-        }
-        return false
-    } 
-    else {
-        for j in 0..this.shape.1 {
-            let mut compt : usize = 0;
-            for row_el in this.col_iter(j) {
-                if *row_el == Zero::zero() {
-                    compt += 1;
-                    if compt == this.shape.0 {
-                        return true
-                    }
-                }
-            }       
-        }
-        return false
+            r}, shape:(self.shape.1,self.shape.0)}
     }
-}
-impl<T : Zero + PartialEq + std::fmt::Display> Matrix<T> {
-    pub fn has_full_zeros_in_rows(&self) -> bool {
-        core_has_full_zeros_in_row_or_col(self, true)
-    }
-    pub fn has_full_zeros_in_cols(&self) -> bool {
-        core_has_full_zeros_in_row_or_col(self, false)
-    }
+
+   
 }
 
 
@@ -303,52 +282,83 @@ impl<T : Zero + PartialEq + std::fmt::Display> Matrix<T> {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-macro_rules! sub_impl {
-    ($($t:ty)*) => ($(
-        impl Matrix<$t> {
-            pub fn round(mut self) -> Self{
-                for el in self.values.iter_mut() {
-                    if el.abs() < 1e-10 {
-                        *el = 0.0;
+impl<T : Copy + Zero + PartialEq + std::fmt::Display> Matrix<T> {
+    pub fn select(&self, mask : &Matrix<bool>)  -> Matrix<T> {
+        if self.shape == mask.shape {
+            let mut nb_el : usize = 0;
+            Matrix::<T> {
+                values : {
+                    let mut r : Vec<T> = Vec::with_capacity(self.length());
+                    for (i,el) in self.values.iter().enumerate() {
+                        if *mask.values.get(i).unwrap() {
+                            r.push(*el);
+                            nb_el += 1;
+                        }
                     }
-                    else {
-                        *el = (*el as $t * 1e10).round()*1e-10;
-                    }   
-                }
-                self
+                r},
+                shape: (1,nb_el)
             }
         }
-)*)
-}
-sub_impl! { f32 f64 }
-
-macro_rules! sub_impl {
-    ($($t:ty)*) => ($(
-        impl Matrix<$t>{
-            pub fn clone_to_ratio(&self) -> Matrix<Ratio<$t>>{
-                Matrix::<Ratio<$t>> {
-                    values:self.values.iter().map(|v : &$t| Ratio::from_integer(*v)).collect(),
-                    shape:self.shape,
-                }
-            }
+        else {
+            exception::raise_exception(
+                &"select",
+                &mut String::from("The mask shape needs to be the same as self matrix."),
+                String::from("Choose matrix A and B such as A.shape==B.shape"),
+                100,
+                10002);
+                panic!();
         }
         
-    )*)
+    }
 }
 
-sub_impl! {i32 i64}
+
+
+
+pub struct MatrixMaskIter<'a, T> {
+    data: &'a Matrix<T>,
+    mask : &'a Matrix<bool>,
+    index : usize,
+}
+
+impl<'a, T> Iterator for MatrixMaskIter<'a, T>{ 
+    type Item = &'a T;
+    fn next(&mut self) ->Option<Self::Item> {
+     while self.index < self.data.length() {
+         if *self.mask.values.get(self.index).unwrap() {
+            self.index += 1;
+            return Some(&self.data.values[self.index-1])
+         }
+         else {
+            self.index += 1;
+         }
+     }
+     None
+    }
+}
+
+
+impl<'a,T> Matrix<T> {
+    pub fn select_iter(&'a self, mask : &'a Matrix<bool>) -> MatrixMaskIter<'a, T> {
+        if  mask.shape != self.shape {
+            exception::raise_exception(
+                &"select_iter",
+                &mut String::from("The mask shape needs to be the same as self matrix."),
+                String::from("Choose matrix A and B such as A.shape==B.shape"),
+                100,
+                10003);
+                panic!();
+        }
+        else {
+            MatrixMaskIter::<'a, T> { data: &self, mask: &mask, index : 0}
+        }
+    }
+
+}
+
+
+
+
+
+
 

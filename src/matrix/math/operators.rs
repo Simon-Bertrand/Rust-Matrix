@@ -129,6 +129,8 @@ impl<T : Copy + NumOps> Add<T> for &Matrix<T>
        core_add_mul_sub_div_with_reals(&self, rhs, (false,false))
     }
 }
+
+
 impl<T : Copy + NumOps> Add<T> for Matrix<T>
 { type Output = Matrix<T>;
     fn add(self, rhs: T) -> Matrix<T> {&self + rhs}}
