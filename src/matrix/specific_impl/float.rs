@@ -2,20 +2,17 @@
 
 use crate::matrix::*;
 
-use num_traits::Float;
-
-pub struct Functions<T> { v : T}
 
 
-pub trait MatrixFloats{}
-macro_rules! sub_impl {
-    ($($t:ty)*) => ($(
-        impl MatrixFloats for Matrix<$t> {}
-    )*)
+pub trait MatrixFloats{
+    fn exp(&self) -> Self;
+    fn sin(&self) -> Self ;
+    fn cos(&self) -> Self ;
+    fn log(&self, base : usize) -> Self;
+    fn powi_ew(&self, powi : i32) -> Self;
+    fn powf_ew(&self, powf : f32) -> Self;
+    fn round(&mut self) -> &mut Self;
 }
-sub_impl! {f32 f64}
-
-
 
 
 fn core_apply<T : Copy,U>(this : &Matrix<T>, f : impl Fn(T) -> U) -> Matrix<U> {
@@ -30,41 +27,28 @@ fn core_apply<T : Copy,U>(this : &Matrix<T>, f : impl Fn(T) -> U) -> Matrix<U> {
     }
 }
 
-impl<T : Copy> Matrix<T> {
-    fn apply(&self, f: impl Fn(T)->T) -> Matrix<T> {
-        core_apply(&self, f)
-    }
-}
-
-impl<T : Copy + Float> Functions<T>{
-    pub fn exp(this : &Matrix<T>) -> Matrix<T> {
-        core_apply(this, | v | v.exp())
-    }
-    pub fn sin(this : &Matrix<T>) -> Matrix<T> {
-        core_apply(this, | v | v.sin())
-    }
-    pub fn cos(this : &Matrix<T>) -> Matrix<T> {
-        core_apply(this, | v | v.cos())
-    }
-    pub fn log(this : &Matrix<T>, base : T) -> Matrix<T> {
-        core_apply(this, | v | v.log(base))
-    }
-    pub fn powi_ew(this : &Matrix<T>, powi : i32) -> Matrix<T> {
-        core_apply(this, | v | v.powi(powi))
-    }
-    pub fn powf_ew(this : &Matrix<T>, powf : T) -> Matrix<T> {
-        core_apply(this, | v | v.powf(powf))
-    }
-
-}
-
-
-
-
 macro_rules! sub_impl {
     ($($t:ty)*) => ($(
-        impl Matrix<$t> {
-            pub fn round(mut self) -> Self{
+        impl MatrixFloats for Matrix<$t> {
+            fn exp(&self) -> Matrix<$t> {
+                core_apply(&self, | v | v.exp())
+            }
+            fn sin(&self) -> Matrix<$t> {
+                core_apply(&self, | v | v.sin())
+            }
+            fn cos(&self) -> Matrix<$t> {
+                core_apply(&self, | v | v.cos())
+            }
+            fn log(&self, base : usize) -> Matrix<$t> {
+                core_apply(&self, | v | v.log(base as $t))
+            }
+            fn powi_ew(&self, powi : i32) -> Matrix<$t> {
+                core_apply(&self, | v | v.powi(powi))
+            }
+            fn powf_ew(&self, powf : f32) -> Matrix<$t> {
+                core_apply(&self, | v | v.powf(powf as $t))
+            }
+            fn round(&mut self) -> &mut Self{
                 for el in self.values.iter_mut() {
                     if el.abs() < 1e-10 {
                         *el = 0.0;
@@ -75,7 +59,18 @@ macro_rules! sub_impl {
                 }
                 self
             }
+
         }
-)*)
+    )*)
 }
-sub_impl! { f32 f64 }
+sub_impl! {f32 f64}
+
+
+
+
+
+impl<T : Copy> Matrix<T> {
+    fn apply(&self, f: impl Fn(T)->T) -> Matrix<T> {
+        core_apply(&self, f)
+    }
+}

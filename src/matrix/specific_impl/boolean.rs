@@ -1,5 +1,4 @@
-use std::cmp::PartialEq;
-use num_traits::Zero;
+
 
 use crate::matrix::*;
 use crate::matrix::utils::exception;
@@ -49,6 +48,7 @@ pub trait MatrixBool{
     fn and(&self, m : &Matrix<bool>) -> Matrix<bool>;
     fn or(&self, m : &Matrix<bool>) -> Matrix<bool>;
     fn not(&self) -> Matrix<bool>;
+    fn convert_to_int(&self) -> Matrix<i32>;
 }
 
 impl MatrixBool for Matrix<bool> {
@@ -68,6 +68,18 @@ impl MatrixBool for Matrix<bool> {
                 }
             r},
             shape : self.shape
+        }
+    }
+
+    fn convert_to_int(&self) -> Matrix<i32> {
+        Matrix::<i32> {
+            values:{ 
+                let mut r : Vec<i32> = Vec::with_capacity(self.length());
+                for el in self.values.iter() {
+                    r.push(if *el {1} else {0});
+                }
+            r},
+            shape: self.shape
         }
     }
 }
